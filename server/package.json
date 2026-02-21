@@ -1,0 +1,9 @@
+{
+    "name": "bookmyturf-server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "type": "commonjs",
+    "dependencies": {
+        "multer": "^2.0.2"
+    }
+}
