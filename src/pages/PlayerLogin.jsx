@@ -2,11 +2,11 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiMail, FiLock } from 'react-icons/fi';
+import { FiPhone, FiLock } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
 
 const PlayerLogin = () => {
-    const [email, setEmail] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useContext(AuthContext);
@@ -16,8 +16,8 @@ const PlayerLogin = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post(`${API_BASE_URL}/api/auth/player/login`, {
-                email,
+            const res = await axios.post(`${API_BASE_URL}/api/players/login`, {
+                phone_number: phoneNumber,
                 password
             });
             login({ ...res.data.player, role: 'player', id: res.data.player.id || res.data.player._id });
@@ -37,24 +37,28 @@ const PlayerLogin = () => {
                 <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '30px' }}>Login to your player account</p>
 
                 <form onSubmit={handleSubmit}>
-                    <label>Email Address</label>
-                    <div style={{ position: 'relative' }}>
-                        <FiMail style={{ position: 'absolute', left: '15px', top: '15px', color: 'var(--text-secondary)' }} />
-                        <input
-                            style={{ paddingLeft: '45px' }}
-                            placeholder="Enter registered email"
-                            type="email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            required
-                        />
+                    <label>Phone Number</label>
+                    <div className="phone-input-group">
+                        <div className="phone-prefix">+91</div>
+                        <div className="input-with-icon">
+                            <FiPhone />
+                            <input
+                                placeholder="Enter 10-digit mobile"
+                                type="tel"
+                                value={phoneNumber}
+                                onChange={e => {
+                                    const value = e.target.value.replace(/\D/g, '');
+                                    if (value.length <= 10) setPhoneNumber(value);
+                                }}
+                                required
+                            />
+                        </div>
                     </div>
 
                     <label>Password</label>
-                    <div style={{ position: 'relative' }}>
-                        <FiLock style={{ position: 'absolute', left: '15px', top: '15px', color: 'var(--text-secondary)' }} />
+                    <div className="input-with-icon">
+                        <FiLock />
                         <input
-                            style={{ paddingLeft: '45px' }}
                             type="password"
                             placeholder="Enter password"
                             value={password}

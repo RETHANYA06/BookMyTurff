@@ -10,7 +10,7 @@ const PlayerProfile = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [formData, setFormData] = useState({
-        name: player?.name || '',
+        full_name: player?.full_name || player?.name || '',
         phone_number: player?.phone_number || '',
         password: '',
         confirmPassword: ''
@@ -43,7 +43,7 @@ const PlayerProfile = () => {
             <form onSubmit={handleSubmit} className="glass" style={{ padding: '40px', borderRadius: '32px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '30px' }}>
                     <div style={{ width: '80px', height: '80px', background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px', color: 'white', fontSize: '2rem' }}>
-                        {formData.name.charAt(0).toUpperCase()}
+                        {formData.full_name?.charAt(0).toUpperCase()}
                     </div>
                     <p style={{ color: 'var(--text-secondary)' }}>Account Member since 2026</p>
                 </div>
@@ -57,8 +57,8 @@ const PlayerProfile = () => {
                 <div style={{ marginBottom: '20px' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiUser size={14} /> Full Name</label>
                     <input
-                        value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        value={formData.full_name}
+                        onChange={e => setFormData({ ...formData, full_name: e.target.value })}
                         required
                     />
                 </div>

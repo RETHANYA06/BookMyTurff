@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { FiMonitor, FiActivity, FiUser, FiCalendar, FiClock, FiCheckCircle, FiXCircle, FiInfo } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
+import { formatINR, formatDate, formatTime } from '../utils/formatters';
 
 const AdminDashboard = () => {
     const { user } = useContext(AuthContext);
@@ -61,7 +62,7 @@ const AdminDashboard = () => {
                     { label: 'Total Bookings', value: stats.total, icon: <FiActivity />, color: 'var(--accent)' },
                     { label: 'Pending Payment', value: stats.pending, icon: <FiInfo />, color: '#f59e0b' },
                     { label: 'Completed', value: stats.completed, icon: <FiCheckCircle />, color: 'var(--success)' },
-                    { label: 'Platform Revenue', value: `₹${stats.revenue}`, icon: <FiActivity />, color: 'var(--primary)' }
+                    { label: 'Platform Revenue', value: formatINR(stats.revenue), icon: <FiActivity />, color: 'var(--primary)' }
                 ].map((s, i) => (
                     <div key={i} className="glass" style={{ padding: '25px', borderLeft: `5px solid ${s.color}` }}>
                         <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
@@ -103,13 +104,13 @@ const AdminDashboard = () => {
                                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{b.phone}</div>
                                         </td>
                                         <td style={{ padding: '15px' }}>
-                                            <div style={{ fontSize: '0.9rem' }}>{b.slot_ids?.[0]?.date}</div>
+                                            <div style={{ fontSize: '0.9rem' }}>{formatDate(b.slot_ids?.[0]?.date)}</div>
                                             <div style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>
-                                                {b.slot_ids?.[0]?.start_time} - {b.slot_ids?.[b.slot_ids.length - 1]?.end_time}
+                                                {formatTime(b.slot_ids?.[0]?.start_time)} - {formatTime(b.slot_ids?.[b.slot_ids.length - 1]?.end_time)}
                                             </div>
                                         </td>
                                         <td style={{ padding: '15px' }}>
-                                            <div style={{ fontWeight: 'bold' }}>₹{b.slot_ids?.reduce((s, slot) => s + (slot.price || 0), 0) || 0}</div>
+                                            <div style={{ fontWeight: 'bold' }}>{formatINR(b.slot_ids?.reduce((s, slot) => s + (slot.price || 0), 0) || 0)}</div>
                                             <div style={{ fontSize: '0.7rem' }} className="badge">
                                                 {b.payment_type?.replace('_', ' ')}
                                             </div>

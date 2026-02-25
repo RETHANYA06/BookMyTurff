@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { FiPlus, FiLock, FiUnlock, FiRefreshCw, FiCalendar, FiClock } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
+import { formatTime } from '../utils/formatters';
 
 const ManagerSlots = () => {
     const { manager } = useContext(AuthContext);
@@ -86,7 +87,7 @@ const ManagerSlots = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <FiClock color="var(--text-secondary)" />
-                                        <h3 style={{ fontSize: '1.2rem' }}>{slot.start_time} - {slot.end_time}</h3>
+                                        <h3 style={{ fontSize: '1.2rem' }}>{formatTime(slot.start_time)} - {formatTime(slot.end_time)}</h3>
                                     </div>
                                     <span className="badge" style={{
                                         background: slot.status === 'available' ? '#dcfce7' : (slot.status === 'booked' ? '#fee2e2' : '#f1f5f9'),

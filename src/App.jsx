@@ -19,7 +19,8 @@ import PlayerDashboard from './pages/PlayerDashboard';
 import PlayerProfile from './pages/PlayerProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import AccessDenied from './pages/AccessDenied';
-import { FiHome, FiUser, FiLogOut, FiLayout, FiSearch, FiList, FiSettings, FiActivity } from 'react-icons/fi';
+import { FiHome, FiUser, FiLogOut, FiLayout, FiSearch, FiList, FiSettings } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useContext(AuthContext);
@@ -56,7 +57,7 @@ const Navbar = () => {
       }}>
         <Link to="/" style={{ fontSize: '26px', fontWeight: '900', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-1px', textDecoration: 'none' }}>
           <div className="animate-float" style={{ background: 'var(--primary)', color: '#0f172a', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(16, 185, 129, 0.4)' }}>
-            <FiActivity size={24} />
+            <GiSoccerBall size={24} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1' }}>
             <span style={{ color: 'var(--text-primary)', fontSize: '1.4rem' }}>BOOK<span style={{ color: 'var(--primary)' }}>MY</span></span>
@@ -66,12 +67,12 @@ const Navbar = () => {
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <Link to={player ? "/player/dashboard" : "/"} className="btn btn-primary" style={{ padding: '12px 25px', borderRadius: '16px', fontSize: '0.95rem' }}>Home</Link>
-          <Link to="/turf-search" className="btn btn-primary" style={{ padding: '12px 25px', borderRadius: '16px', fontSize: '0.95rem' }}>Elite Search</Link>
+          <Link to="/login" className="btn btn-primary" style={{ padding: '12px 25px', borderRadius: '16px', fontSize: '0.95rem' }}>Login</Link>
 
           {player && (
             <>
               <Link to="/player/turfs" className="btn-outline" style={{ padding: '10px 18px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700' }}><FiList size={18} /> TURF</Link>
-              <Link to="/my-bookings" className="btn-outline" style={{ padding: '10px 18px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700' }}><FiActivity size={18} /> My Games</Link>
+              <Link to="/my-bookings" className="btn-outline" style={{ padding: '10px 18px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700' }}><GiSoccerBall size={18} /> My Games</Link>
             </>
           )}
 
@@ -93,7 +94,7 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <Link to="/login" className="btn btn-primary" style={{ padding: '12px 30px', borderRadius: '16px', fontSize: '0.95rem' }}>Join the Elite</Link>
+              <Link to="/register" className="btn btn-primary" style={{ padding: '12px 30px', borderRadius: '16px', fontSize: '0.95rem' }}>Register</Link>
             )}
           </div>
         </div>

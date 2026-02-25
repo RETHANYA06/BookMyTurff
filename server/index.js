@@ -18,6 +18,7 @@ app.use('/api/players', require('./routes/players'));
 app.use('/api/turfs', require('./routes/turfs'));
 app.use('/api/slots', require('./routes/slots'));
 app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/reviews', require('./routes/reviews'));
 
 // Global error handler
 app.use((err, req, res, next) => {

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { FiCalendar, FiClock, FiMapPin, FiXCircle, FiCheckCircle, FiInfo, FiActivity } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiMapPin, FiXCircle, FiCheckCircle, FiInfo } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
+import { formatINR, formatDate, formatTime } from '../utils/formatters';
 
 const MyBookings = () => {
     const { player } = useContext(AuthContext);
@@ -131,20 +133,20 @@ const MyBookings = () => {
                                     <div>
                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '8px' }}>Timeline</div>
                                         <div style={{ fontWeight: '900', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                                            {booking.slot_ids?.[0]?.start_time} - {booking.slot_ids?.[(booking.slot_ids?.length || 0) - 1]?.end_time}
-                                            <div style={{ color: 'var(--primary)', marginTop: '4px', fontSize: '0.8rem' }}>{booking.slot_ids?.[0]?.date}</div>
+                                            {formatTime(booking.slot_ids?.[0]?.start_time)} - {formatTime(booking.slot_ids?.[(booking.slot_ids?.length || 0) - 1]?.end_time)}
+                                            <div style={{ color: 'var(--primary)', marginTop: '4px', fontSize: '0.8rem' }}>{formatDate(booking.slot_ids?.[0]?.date)}</div>
                                         </div>
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '8px' }}>Squad Size</div>
                                         <div style={{ fontWeight: '900', fontSize: '0.9rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <FiActivity color="var(--primary)" /> {booking.players_count} Members
+                                            <GiSoccerBall color="var(--primary)" /> {booking.players_count} Members
                                         </div>
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '8px' }}>Intel</div>
                                         <div style={{ fontWeight: '900', fontSize: '0.9rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            ₹{booking.slot_ids?.reduce((s, slot) => s + slot.price, 0) || 0}
+                                            {formatINR(booking.slot_ids?.reduce((s, slot) => s + slot.price, 0) || 0)}
                                             <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Paid</span>
                                         </div>
                                     </div>

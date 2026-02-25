@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiUser, FiActivity, FiArrowRight, FiCheck } from 'react-icons/fi';
+import { FiUser, FiArrowRight, FiCheck } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const Register = () => {
             id: 'owner',
             title: 'Turf Owner',
             description: 'List your turf, manage bookings, and grow your sports business.',
-            icon: <FiActivity size={32} />,
+            icon: <GiSoccerBall size={32} />,
             color: '#0ea5e9', // Sky blue for owner
             path: '/owner-register'
         }

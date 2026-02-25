@@ -2,11 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiMail, FiLock, FiUser, FiActivity, FiLayout } from 'react-icons/fi';
+import { FiPhone, FiLock, FiUser, FiLayout } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('player'); // Default to player
     const [loading, setLoading] = useState(false);
@@ -26,7 +27,7 @@ const Login = () => {
         setLoading(true);
         try {
             const endpoint = role === 'player' ? `${API_BASE_URL}/api/players/login` : `${API_BASE_URL}/api/auth/login`;
-            const res = await axios.post(endpoint, { email, password });
+            const res = await axios.post(endpoint, { phone_number: phoneNumber, password });
 
             const userData = role === 'player'
                 ? { ...res.data.player, role: res.data.player.role || 'player', id: res.data.player.id || res.data.player._id }
@@ -58,7 +59,7 @@ const Login = () => {
             <div className="glass-heavy" style={{ padding: '60px', borderRadius: '40px', border: '1px solid var(--border-subtle)', boxShadow: '0 40px 80px rgba(0,0,0,0.05)' }}>
                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <div className="animate-float" style={{ background: 'var(--primary)', width: '60px', height: '60px', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: '0 10px 20px rgba(16, 185, 129, 0.2)' }}>
-                        <FiActivity size={30} color="#ffffff" />
+                        <GiSoccerBall size={30} color="#ffffff" />
                     </div>
                     <h2 style={{ fontSize: '2.5rem', color: 'var(--text-primary)', marginBottom: '10px', letterSpacing: '-1px' }}>Portal Access</h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', fontWeight: '500' }}>Welcome back, choose your role</p>
@@ -96,31 +97,35 @@ const Login = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: '25px' }}>
-                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Digital Identity</label>
-                        <div style={{ position: 'relative' }}>
-                            <FiMail style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                placeholder="name@domain.com"
-                                required
-                                style={{ width: '100%', paddingLeft: '50px', height: '60px', fontSize: '1rem', fontWeight: '600' }}
-                            />
+                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Phone Number</label>
+                        <div className="phone-input-group">
+                            <div className="phone-prefix">+91</div>
+                            <div className="input-with-icon">
+                                <FiPhone />
+                                <input
+                                    type="tel"
+                                    value={phoneNumber}
+                                    onChange={e => {
+                                        const value = e.target.value.replace(/\D/g, '');
+                                        if (value.length <= 10) setPhoneNumber(value);
+                                    }}
+                                    placeholder="Mobile number"
+                                    required
+                                />
+                            </div>
                         </div>
                     </div>
 
                     <div style={{ marginBottom: '35px' }}>
                         <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Secure Key</label>
-                        <div style={{ position: 'relative' }}>
-                            <FiLock style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+                        <div className="input-with-icon">
+                            <FiLock />
                             <input
                                 type="password"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                style={{ width: '100%', paddingLeft: '50px', height: '60px', fontSize: '1rem', fontWeight: '600' }}
                             />
                         </div>
                     </div>

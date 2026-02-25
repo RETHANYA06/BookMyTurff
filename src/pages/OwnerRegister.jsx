@@ -2,7 +2,8 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiUser, FiPhone, FiMail, FiLock, FiHome, FiMapPin, FiClock, FiSettings, FiCheck, FiPlus, FiTrash, FiActivity, FiLayers } from 'react-icons/fi';
+import { FiUser, FiPhone, FiMail, FiLock, FiHome, FiMapPin, FiClock, FiSettings, FiCheck, FiPlus, FiTrash, FiLayers } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
 
 const OwnerRegister = () => {
@@ -13,7 +14,7 @@ const OwnerRegister = () => {
 
     const [formData, setFormData] = useState({
         // Step 1: Account
-        name: '', phone: '', email: '', password: '',
+        name: '', phone_number: '', email: '', password: '',
         // Step 2: Turf Basic
         turf_name: '', image_url: '', location: '', google_map_link: '', sport_type: '5s football', turf_size: 'medium',
         // Step 3: Operating
@@ -26,7 +27,8 @@ const OwnerRegister = () => {
 
     const handleNext = () => {
         if (step === 1) {
-            if (formData.phone.length < 10) return alert('Enter a valid phone number');
+            if (!/^[6-9]\d{9}$/.test(formData.phone_number)) return alert('Invalid phone number format');
+            if (!formData.name || !formData.password) return alert('Fill all mandatory fields');
         }
         if (step === 2) {
             if (!formData.turf_name || !formData.location) return alert('Fill all mandatory fields');
@@ -108,15 +110,27 @@ const OwnerRegister = () => {
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label>Business Phone</label>
-                                <div style={{ position: 'relative' }}>
-                                    <FiPhone style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', opacity: 0.7 }} />
-                                    <input style={{ paddingLeft: '50px' }} placeholder="10-digit mobile number" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                                <label>Business Phone Number</label>
+                                <div className="phone-input-group">
+                                    <div className="phone-prefix">+91</div>
+                                    <div className="input-with-icon">
+                                        <FiPhone />
+                                        <input
+                                            placeholder="Enter 10-digit mobile"
+                                            type="tel"
+                                            value={formData.phone_number}
+                                            onChange={e => {
+                                                const val = e.target.value.replace(/\D/g, '');
+                                                if (val.length <= 10) setFormData({ ...formData, phone_number: val });
+                                            }}
+                                        />
+                                    </div>
                                 </div>
+                                <small style={{ display: 'block', marginTop: '-15px', fontSize: '0.75rem', color: 'var(--text-secondary)', paddingLeft: '5px' }}>Must start with 6, 7, 8 or 9</small>
                             </div>
                         </div>
                         <div className="form-group">
-                            <label>Professional Email</label>
+                            <label>Professional Email (Optional)</label>
                             <div style={{ position: 'relative' }}>
                                 <FiMail style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', opacity: 0.7 }} />
                                 <input style={{ paddingLeft: '50px' }} type="email" placeholder="owner@yourturf.com" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
@@ -138,7 +152,7 @@ const OwnerRegister = () => {
                         <div className="form-group">
                             <label>Turf Name</label>
                             <div style={{ position: 'relative' }}>
-                                <FiActivity style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', opacity: 0.7 }} />
+                                <GiSoccerBall style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', opacity: 0.7 }} />
                                 <input style={{ paddingLeft: '50px' }} placeholder="e.g. Wembley Sports Center" value={formData.turf_name} onChange={e => setFormData({ ...formData, turf_name: e.target.value })} />
                             </div>
                         </div>
@@ -294,7 +308,8 @@ const OwnerRegister = () => {
                     )}
                 </div>
             </div>
-        </div >
+
+        </div>
     );
 };
 

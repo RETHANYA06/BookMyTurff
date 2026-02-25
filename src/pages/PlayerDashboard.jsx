@@ -3,11 +3,12 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import {
-    FiSearch, FiMapPin, FiActivity, FiDollarSign, FiStar,
+    FiSearch, FiMapPin, FiDollarSign, FiStar,
     FiCalendar, FiClock, FiXCircle, FiPlay, FiUser,
     FiChevronRight, FiFilter, FiTrendingUp, FiCheckCircle
 } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
+import { formatINR, formatDate, formatTime } from '../utils/formatters';
 
 const PlayerDashboard = () => {
     const { player, logout } = useContext(AuthContext);
@@ -207,7 +208,7 @@ const PlayerDashboard = () => {
                                             <FiMapPin size={16} color="var(--primary)" /> {turf.location}
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
-                                            <div style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '1.2rem' }}>₹{turf.starting_price || 800}<span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}> /hr</span></div>
+                                            <div style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '1.2rem' }}>{formatINR(turf.starting_price || 800)}<span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}> /hr</span></div>
                                             <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: '800', border: '1px solid var(--primary)', padding: '4px 10px', borderRadius: '8px' }}>{turf.sport_type}</span>
                                         </div>
                                     </div>
@@ -233,7 +234,7 @@ const PlayerDashboard = () => {
                                         <h2 style={{ color: 'var(--bg-page)', marginBottom: '5px', fontSize: '1.8rem' }}>Elite Play, Any Budget</h2>
                                         <p style={{ opacity: 0.9, fontSize: '1rem', fontWeight: '600' }}>Filter turf by your hourly power play.</p>
                                     </div>
-                                    <div style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-1px' }}>₹{filters.priceRange}</div>
+                                    <div style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-1px' }}>{formatINR(filters.priceRange)}</div>
                                 </div>
                                 <input
                                     type="range" min="300" max="2500" step="100"
@@ -242,8 +243,8 @@ const PlayerDashboard = () => {
                                     style={{ accentColor: 'var(--bg-page)', height: '8px', padding: 0, width: '100%' }}
                                 />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginTop: '15px', opacity: 0.9, fontWeight: '800' }}>
-                                    <span>₹300</span>
-                                    <span>₹2500</span>
+                                    <span>{formatINR(300)}</span>
+                                    <span>{formatINR(2500)}</span>
                                 </div>
                             </div>
                         </div>
@@ -267,13 +268,11 @@ const PlayerDashboard = () => {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '15px' }}>
                                         <div>
                                             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '5px' }}>Time</div>
-                                            <div style={{ fontWeight: '800', fontSize: '1rem', color: 'var(--text-primary)' }}>
-                                                {dashboardData.upcoming.slot_ids?.[0]?.start_time}
-                                            </div>
+                                            {formatTime(dashboardData.upcoming.slot_ids?.[0]?.start_time)}
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
                                             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '5px' }}>Date</div>
-                                            <div style={{ fontWeight: '800', fontSize: '1rem', color: 'var(--text-primary)' }}>{dashboardData.upcoming.slot_ids?.[0]?.date}</div>
+                                            <div style={{ fontWeight: '800', fontSize: '1rem', color: 'var(--text-primary)' }}>{formatDate(dashboardData.upcoming.slot_ids?.[0]?.date)}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -315,7 +314,7 @@ const PlayerDashboard = () => {
                                     <div style={{ flex: 1 }}>
                                         <div style={{ fontWeight: '800', fontSize: '1rem', marginBottom: '4px', color: 'var(--text-primary)' }}>{turf.turf_name}</div>
                                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                            <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{turf.next_slot || 'Now'}</span> • ₹{turf.starting_price}
+                                            <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{turf.next_slot ? formatTime(turf.next_slot) : 'Now'}</span> • {formatINR(turf.starting_price)}
                                         </div>
                                     </div>
                                     <button
@@ -342,9 +341,9 @@ const PlayerDashboard = () => {
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ fontWeight: '700', fontSize: '0.95rem', color: 'var(--text-primary)' }}>{b.turf_id?.turf_name}</div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{b.slot_ids?.[0]?.date || 'Past Match'}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{b.slot_ids?.[0]?.date ? formatDate(b.slot_ids[0].date) : 'Past Match'}</div>
                                     </div>
-                                    <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-primary)' }}>₹{b.slot_ids?.reduce((s, slot) => s + slot.price, 0) || 0}</div>
+                                    <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-primary)' }}>{formatINR(b.slot_ids?.reduce((s, slot) => s + slot.price, 0) || 0)}</div>
                                 </div>
                             ))}
                             <Link to="/my-bookings" style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--primary)', fontWeight: '800', marginTop: '15px', padding: '12px', borderRadius: '15px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.1)' }}>Full History →</Link>

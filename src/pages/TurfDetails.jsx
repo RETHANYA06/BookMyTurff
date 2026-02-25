@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
+﻿import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { FiCalendar, FiClock, FiCheckCircle, FiInfo, FiUser, FiUsers, FiArrowRight, FiArrowLeft, FiShoppingBag, FiTruck, FiMapPin, FiActivity, FiLayers } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiCheckCircle, FiInfo, FiUser, FiUsers, FiArrowRight, FiArrowLeft, FiShoppingBag, FiTruck, FiMapPin, FiLayers, FiStar } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
+import { formatINR, formatDate, formatTime } from '../utils/formatters';
 
 const TurfDetails = () => {
     const { id } = useParams();
@@ -28,6 +30,15 @@ const TurfDetails = () => {
     const { player } = useContext(AuthContext);
     const [bookingResult, setBookingResult] = useState(null);
     const [loadingSlots, setLoadingSlots] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [hasReviewed, setHasReviewed] = useState(false);
+    const [myReview, setMyReview] = useState(null);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewHover, setReviewHover] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
+    const [reviewSubmitting, setReviewSubmitting] = useState(false);
+    const [reviewError, setReviewError] = useState('');
+    const [reviewSuccess, setReviewSuccess] = useState(false);
 
     useEffect(() => {
         if (player) {
@@ -45,6 +56,15 @@ const TurfDetails = () => {
         setItems(res.data.items || []);
     };
 
+    const fetchReviews = async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/reviews/${id}`);
+            setReviews(res.data);
+        } catch (err) {
+            console.error('Error fetching reviews:', err);
+        }
+    };
+
     const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
@@ -57,7 +77,50 @@ const TurfDetails = () => {
 
     useEffect(() => {
         fetchTurfDetails();
+        fetchReviews();
     }, [id]);
+
+    useEffect(() => {
+        if (player && reviews.length > 0) {
+            const playerId = player.id || player._id;
+            const existing = reviews.find(r => r.player_id === playerId || r.player_id?.toString() === playerId?.toString());
+            if (existing) {
+                setHasReviewed(true);
+                setMyReview(existing);
+            } else {
+                setHasReviewed(false);
+                setMyReview(null);
+            }
+        } else if (player && reviews.length === 0) {
+            setHasReviewed(false);
+            setMyReview(null);
+        }
+    }, [player, reviews]);
+
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+        if (!reviewRating) return setReviewError('Please select a star rating.');
+        setReviewError('');
+        setReviewSubmitting(true);
+        try {
+            await axios.post(`${API_BASE_URL}/api/reviews`, {
+                turf_id: id,
+                player_id: player.id || player._id,
+                player_name: player.full_name,
+                rating: reviewRating,
+                comment: reviewComment
+            });
+            setReviewSuccess(true);
+            setReviewComment('');
+            setReviewRating(0);
+            await fetchReviews();
+            await fetchTurfDetails();
+        } catch (err) {
+            setReviewError(err.response?.data?.message || 'Failed to submit review.');
+        } finally {
+            setReviewSubmitting(false);
+        }
+    };
 
     useEffect(() => {
         fetchSlots();
@@ -227,6 +290,24 @@ const TurfDetails = () => {
         return slotTotal + itemTotal;
     };
 
+    const renderStars = (rating, size = 18, interactive = false, hoverVal = 0, onHover = null, onClick = null) => {
+        return [1, 2, 3, 4, 5].map(star => (
+            <span
+                key={star}
+                style={{
+                    cursor: interactive ? 'pointer' : 'default',
+                    fontSize: `${size}px`,
+                    color: star <= (interactive ? (hoverVal || rating) : rating) ? '#f59e0b' : 'rgba(255,255,255,0.15)',
+                    transition: 'color 0.15s ease',
+                    display: 'inline-block'
+                }}
+                onMouseEnter={interactive && onHover ? () => onHover(star) : undefined}
+                onMouseLeave={interactive && onHover ? () => onHover(0) : undefined}
+                onClick={interactive && onClick ? () => onClick(star) : undefined}
+            >★</span>
+        ));
+    };
+
     if (!turf) return <div style={{ textAlign: 'center', padding: '100px' }}><div className="loader"></div></div>;
 
     return (
@@ -265,10 +346,22 @@ const TurfDetails = () => {
                                         <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', fontWeight: '600', marginTop: '10px' }}>
                                             <FiMapPin color="var(--primary)" size={20} /> {turf.location}
                                         </div>
+                                        {/* Rating summary */}
+                                        <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            {turf.rating ? (
+                                                <>
+                                                    <span style={{ fontSize: '1.3rem', fontWeight: '900', color: '#f59e0b' }}>{turf.rating}</span>
+                                                    <span style={{ fontSize: '1.2rem', letterSpacing: '-1px' }}>{renderStars(Math.round(turf.rating), 16)}</span>
+                                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600' }}>({turf.reviews_count} {turf.reviews_count === 1 ? 'review' : 'reviews'})</span>
+                                                </>
+                                            ) : (
+                                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', background: 'rgba(255,255,255,0.04)', padding: '4px 14px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)' }}>No ratings yet — be the first!</span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div style={{ textAlign: 'right', background: 'rgba(16, 185, 129, 0.05)', padding: '20px 30px', borderRadius: '24px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '5px', fontWeight: '800' }}>Investment Basis</div>
-                                        <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--primary)', lineHeight: '1' }}>₹{turf.price_per_hour || '500'} <span style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '600' }}>/ HR</span></div>
+                                        <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--primary)', lineHeight: '1' }}>{formatINR(turf.price_per_hour || 500)} <span style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '600' }}>/ HR</span></div>
                                     </div>
                                 </div>
 
@@ -393,9 +486,9 @@ const TurfDetails = () => {
                                                                 transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                                                             }}
                                                         >
-                                                            <div style={{ fontWeight: '900', fontSize: '1.2rem' }}>{slot.start_time}</div>
+                                                            <div style={{ fontWeight: '900', fontSize: '1.2rem' }}>{formatTime(slot.start_time)}</div>
                                                             <div style={{ fontSize: '0.75rem', fontWeight: '800', marginTop: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                                                {isLockedByOther ? 'LOCKED' : (slot.status === 'booked' ? 'ENGAGED' : `₹${slot.price}`)}
+                                                                {isLockedByOther ? 'LOCKED' : (slot.status === 'booked' ? 'ENGAGED' : formatINR(slot.price))}
                                                             </div>
                                                         </button>
                                                     );
@@ -404,6 +497,117 @@ const TurfDetails = () => {
                                         </div>
                                     ))}
                                     {slots.length === 0 && <div className="glass" style={{ textAlign: 'center', padding: '60px', borderRadius: '24px', color: 'var(--text-secondary)', fontWeight: '700' }}>System status: No tactical openings detected for this window.</div>}
+                                </div>
+                            )}
+                        </section>
+
+                        {/* 3. Reviews Section */}
+                        <section className="glass-heavy" style={{ padding: '50px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px' }}>
+                                <h2 style={{ display: 'flex', alignItems: 'center', gap: '15px', fontSize: '2.2rem', color: 'var(--text-primary)', fontWeight: '900', letterSpacing: '-1px' }}>
+                                    <FiStar color="#f59e0b" /> Player Reviews
+                                </h2>
+                                {turf.rating && (
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '3rem', fontWeight: '900', color: '#f59e0b', lineHeight: '1' }}>{turf.rating}</div>
+                                        <div style={{ fontSize: '1.3rem', letterSpacing: '-1px', marginTop: '4px' }}>{renderStars(Math.round(turf.rating), 18)}</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', marginTop: '5px' }}>{turf.reviews_count} {turf.reviews_count === 1 ? 'review' : 'reviews'}</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Write a Review */}
+                            {player && player.role === 'player' ? (
+                                hasReviewed ? (
+                                    <div style={{ padding: '30px', background: 'rgba(16, 185, 129, 0.06)', borderRadius: '24px', border: '1px solid rgba(16, 185, 129, 0.15)', marginBottom: '40px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                                            <FiUser color="var(--primary)" size={18} />
+                                            <span style={{ fontWeight: '900', color: 'var(--primary)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Your Review</span>
+                                        </div>
+                                        <div style={{ fontSize: '1.3rem', marginBottom: '8px' }}>{renderStars(myReview?.rating || 0, 20)}</div>
+                                        <p style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '1rem', lineHeight: '1.6' }}>{myReview?.comment || <em style={{ color: 'var(--text-secondary)' }}>No comment left.</em>}</p>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '10px', fontWeight: '600' }}>{myReview && new Date(myReview.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={handleSubmitReview} style={{ padding: '35px', background: 'rgba(255,255,255,0.02)', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: '40px' }}>
+                                        <h4 style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--text-primary)', marginBottom: '20px' }}>Rate this Turf</h4>
+                                        <div style={{ marginBottom: '20px' }}>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '800', marginBottom: '12px' }}>Your Rating</div>
+                                            <div style={{ fontSize: '2.2rem', lineHeight: '1', letterSpacing: '4px' }}>
+                                                {renderStars(reviewRating, 32, true, reviewHover, setReviewHover, setReviewRating)}
+                                            </div>
+                                        </div>
+                                        <div style={{ marginBottom: '20px' }}>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '800', marginBottom: '12px' }}>Comment (optional)</div>
+                                            <textarea
+                                                rows={3}
+                                                placeholder="Share your experience at this turf..."
+                                                value={reviewComment}
+                                                onChange={e => setReviewComment(e.target.value)}
+                                                style={{ width: '100%', resize: 'vertical', fontSize: '1rem', fontWeight: '500', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                                            />
+                                        </div>
+                                        {reviewError && <p style={{ color: '#ef4444', fontWeight: '700', fontSize: '0.9rem', marginBottom: '15px' }}>⚠️ {reviewError}</p>}
+                                        {reviewSuccess && <p style={{ color: 'var(--primary)', fontWeight: '700', fontSize: '0.9rem', marginBottom: '15px' }}>✓ Review submitted successfully!</p>}
+                                        <button
+                                            type="submit"
+                                            disabled={reviewSubmitting}
+                                            className="btn btn-primary"
+                                            style={{ height: '55px', padding: '0 35px', borderRadius: '16px', fontSize: '1rem', opacity: reviewSubmitting ? 0.7 : 1 }}
+                                        >
+                                            {reviewSubmitting ? 'Submitting...' : 'Submit Review ★'}
+                                        </button>
+                                    </form>
+                                )
+                            ) : (
+                                <div style={{ padding: '25px', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '40px', textAlign: 'center' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>
+                                        {!player ? <><span style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: '800' }} onClick={() => navigate('/player-login')}>Login as a player</span> to rate this turf.</> : 'Only players can submit reviews.'}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Reviews List */}
+                            {reviews.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-secondary)', fontWeight: '600' }}>
+                                    <div style={{ fontSize: '3rem', marginBottom: '15px', opacity: 0.3 }}>â­</div>
+                                    <p style={{ fontSize: '1.1rem' }}>No reviews yet. Be the first to rate this turf!</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                                    {reviews.map(review => {
+                                        const isMyReview = review.player_id === (player?.id || player?._id) || review.player_id?.toString() === (player?.id || player?._id)?.toString();
+                                        return (
+                                            <div key={review._id} style={{
+                                                padding: '25px',
+                                                borderRadius: '24px',
+                                                background: isMyReview ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.02)',
+                                                border: isMyReview ? '1px solid rgba(16, 185, 129, 0.15)' : '1px solid rgba(255,255,255,0.05)'
+                                            }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                                                    <div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <div style={{ width: '36px', height: '36px', background: isMyReview ? 'var(--primary)' : 'rgba(255,255,255,0.08)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '0.9rem', color: isMyReview ? '#0f172a' : 'var(--text-primary)' }}>
+                                                                {(review.player_name || 'P').charAt(0).toUpperCase()}
+                                                            </div>
+                                                            <div>
+                                                                <div style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                                                                    {review.player_name} {isMyReview && <span style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: '900', background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: '10px', marginLeft: '6px' }}>You</span>}
+                                                                </div>
+                                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '600' }}>
+                                                                    {new Date(review.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ fontSize: '1.1rem', letterSpacing: '2px' }}>{renderStars(review.rating, 16)}</div>
+                                                </div>
+                                                {review.comment && (
+                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.7', fontWeight: '500', marginTop: '10px', paddingLeft: '46px' }}>{review.comment}</p>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </section>
@@ -447,7 +651,7 @@ const TurfDetails = () => {
                                             <div key={item._id} className="glass" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 20px', borderRadius: '18px', background: 'rgba(255,255,255,0.02)' }}>
                                                 <div>
                                                     <div style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-primary)' }}>{item.item_name}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '700' }}>₹{item.rent_price} / unit</div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '700' }}>{formatINR(item.rent_price)} / unit</div>
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(0,0,0,0.3)', padding: '5px 12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                     <button type="button" onClick={() => setSelectedItems({ ...selectedItems, [item._id]: Math.max(0, (selectedItems[item._id] || 0) - 1) })} style={{ border: 'none', background: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.2rem', fontWeight: '900' }}>-</button>
@@ -475,7 +679,7 @@ const TurfDetails = () => {
                                 <div className="glass-heavy" style={{ padding: '25px', borderRadius: '24px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.1)', margin: '35px 0' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Final Allocation</span>
-                                        <span style={{ fontWeight: '900', fontSize: '2rem', color: 'var(--primary)' }}>₹{calculateTotal()}</span>
+                                        <span style={{ fontWeight: '900', fontSize: '2rem', color: 'var(--primary)' }}>{formatINR(calculateTotal())}</span>
                                     </div>
                                     <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', fontWeight: '600' }}>Inclusive of {selectedSlots.length} tactical units & requisitioned gear.</p>
                                 </div>
@@ -492,19 +696,19 @@ const TurfDetails = () => {
                                     <div className="glass" style={{ padding: '25px', borderRadius: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '900', marginBottom: '12px' }}>Objective Sector</div>
                                         <div style={{ fontWeight: '900', fontSize: '1.4rem', color: 'var(--text-primary)', lineHeight: '1.1' }}>{turf.turf_name}</div>
-                                        <div style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '1rem', marginTop: '10px' }}>{date}</div>
+                                        <div style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '1rem', marginTop: '10px' }}>{date ? formatDate(date) : ''}</div>
                                     </div>
 
                                     {selectedSlots.length > 0 ? (
                                         <>
                                             <div className="glass" style={{ padding: '25px', borderRadius: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '900', marginBottom: '12px' }}>Deployment Window</div>
-                                                <div style={{ fontWeight: '900', fontSize: '1.2rem', color: 'var(--text-primary)' }}>{selectedSlots[0]?.start_time} — {selectedSlots[(selectedSlots?.length || 0) - 1]?.end_time}</div>
+                                                <div style={{ fontWeight: '900', fontSize: '1.2rem', color: 'var(--text-primary)' }}>{formatTime(selectedSlots[0]?.start_time)} — {formatTime(selectedSlots[(selectedSlots?.length || 0) - 1]?.end_time)}</div>
                                                 <div style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: '800', marginTop: '8px' }}>{selectedSlots.length} Session Blocks</div>
                                             </div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', padding: '0 10px' }}>
                                                 <span style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: '800' }}>Valuation</span>
-                                                <span style={{ fontWeight: '900', fontSize: '2rem', color: 'var(--primary)' }}>₹{calculateTotal()}</span>
+                                                <span style={{ fontWeight: '900', fontSize: '2rem', color: 'var(--primary)' }}>{formatINR(calculateTotal())}</span>
                                             </div>
                                             <button
                                                 className="btn btn-primary"
@@ -560,22 +764,22 @@ const TurfDetails = () => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="glass" style={{ padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.01)' }}>
                                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '5px' }}>Date</div>
-                                <div style={{ fontWeight: '900', color: 'var(--text-primary)', fontSize: '1.2rem' }}>{date}</div>
+                                <div style={{ fontWeight: '900', color: 'var(--text-primary)', fontSize: '1.2rem' }}>{date ? formatDate(date) : ''}</div>
                             </div>
                             <div className="glass" style={{ padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.01)' }}>
                                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '5px' }}>Window</div>
-                                <div style={{ fontWeight: '900', color: 'var(--text-primary)', fontSize: '1.2rem' }}>{selectedSlots[0]?.start_time} - {selectedSlots[(selectedSlots?.length || 0) - 1]?.end_time}</div>
+                                <div style={{ fontWeight: '900', color: 'var(--text-primary)', fontSize: '1.2rem' }}>{formatTime(selectedSlots[0]?.start_time)} - {formatTime(selectedSlots[(selectedSlots?.length || 0) - 1]?.end_time)}</div>
                             </div>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '30px', marginTop: '30px', alignItems: 'center' }}>
                             <span style={{ color: 'var(--text-primary)', fontSize: '1.3rem', fontWeight: '900', letterSpacing: '-0.5px' }}>Asset Valuation</span>
-                            <span style={{ fontWeight: '900', fontSize: '2.5rem', color: 'var(--primary)' }}>₹{calculateTotal()}</span>
+                            <span style={{ fontWeight: '900', fontSize: '2.5rem', color: 'var(--primary)' }}>{formatINR(calculateTotal())}</span>
                         </div>
                     </div>
 
                     <div style={{ display: 'flex', gap: '20px' }}>
                         <button onClick={() => navigate('/my-bookings')} className="btn btn-primary" style={{ flex: 1, height: '75px', borderRadius: '22px', fontSize: '1.2rem' }}>
-                            Access Archives <FiActivity size={24} />
+                            Access Archives <GiSoccerBall size={24} />
                         </button>
                         <button onClick={() => navigate('/')} className="btn-outline" style={{ flex: 1, height: '75px', borderRadius: '22px', fontSize: '1.2rem', background: 'rgba(0,0,0,0.03)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', cursor: 'pointer' }}>
                             Sector Return

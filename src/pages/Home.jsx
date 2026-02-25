@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { FiMapPin, FiClock, FiUsers, FiArrowRight, FiSearch } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
+import { formatINR, formatTime } from '../utils/formatters';
 
 const Home = () => {
     const [turfs, setTurfs] = useState([]);
@@ -73,7 +74,7 @@ const Home = () => {
                 </div>
 
                 <h1 style={{ fontSize: '5.5rem', marginTop: '10px', marginBottom: '25px', lineHeight: '0.9', color: 'var(--text-primary)', fontWeight: '900', letterSpacing: '-3px' }}>
-                    COMMAND THE <span className="text-glow" style={{ color: 'var(--primary)' }}>PITCH</span>.
+                    BOOK YOUR <span className="text-glow" style={{ color: 'var(--primary)' }}>TURF</span>.
                 </h1>
 
                 <p style={{ color: 'var(--text-secondary)', fontSize: '1.4rem', maxWidth: '800px', margin: '0 auto 60px', fontWeight: '500', lineHeight: '1.4' }}>
@@ -169,13 +170,13 @@ const Home = () => {
                                         <div>
                                             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '3px' }}>Hours</div>
                                             <div style={{ fontWeight: '800', fontSize: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                <FiClock color="var(--primary)" size={16} /> {turf.opening_time} - {turf.closing_time}
+                                                <FiClock color="var(--primary)" size={16} /> {formatTime(turf.opening_time)} - {formatTime(turf.closing_time)}
                                             </div>
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '3px' }}>Starting From</div>
-                                        <div style={{ fontSize: '1.4rem', fontWeight: '900', color: 'var(--primary)' }}>₹{turf.starting_price || turf.base_price || 500}</div>
+                                        <div style={{ fontSize: '1.4rem', fontWeight: '900', color: 'var(--primary)' }}>{formatINR(turf.starting_price || turf.base_price || 500)}</div>
                                     </div>
                                 </div>
 

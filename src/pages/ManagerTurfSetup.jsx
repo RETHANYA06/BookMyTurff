@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { FiSave, FiPlus, FiTrash2 } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
+import { formatINR } from '../utils/formatters';
 
 const ManagerTurfSetup = () => {
     const { manager } = useContext(AuthContext);
@@ -179,7 +180,7 @@ const ManagerTurfSetup = () => {
                             <div key={item._id} className="glass" style={{ padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)' }}>
                                 <div>
                                     <b>{item.item_name}</b>
-                                    <div style={{ fontSize: '0.9rem', color: 'var(--primary)' }}>₹{item.rent_price}</div>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--primary)' }}>{formatINR(item.rent_price)}</div>
                                 </div>
                                 <button className="btn" style={{ color: 'var(--danger)' }} onClick={() => deleteItem(item._id)}>
                                     <FiTrash2 />

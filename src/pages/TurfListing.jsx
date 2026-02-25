@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiMapPin, FiStar, FiActivity, FiDollarSign, FiClock, FiArrowRight, FiNavigation, FiInfo } from 'react-icons/fi';
+import { FiMapPin, FiStar, FiDollarSign, FiClock, FiArrowRight, FiNavigation, FiInfo } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
+import { formatINR } from '../utils/formatters';
 
 const TurfListing = () => {
     const { player } = useContext(AuthContext);
@@ -86,10 +87,17 @@ const TurfListing = () => {
                                 onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=800&auto=format&fit=crop' }}
                             />
                             <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px' }}>
-                                <div className="glass" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <FiStar color="#f59e0b" fill="#f59e0b" size={14} />
-                                    <span style={{ color: 'white', fontWeight: '800', fontSize: '0.85rem' }}>{turf.rating || 4.8}</span>
-                                </div>
+                                {turf.rating ? (
+                                    <div className="glass" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <FiStar color="#f59e0b" fill="#f59e0b" size={14} />
+                                        <span style={{ color: 'white', fontWeight: '800', fontSize: '0.85rem' }}>{turf.rating}</span>
+                                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem' }}>({turf.reviews_count})</span>
+                                    </div>
+                                ) : (
+                                    <div className="glass" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(16,185,129,0.3)', padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ color: '#10b981', fontWeight: '800', fontSize: '0.75rem' }}>✦ NEW</span>
+                                    </div>
+                                )}
                                 <div style={{ background: 'var(--primary)', color: '#0f172a', padding: '6px 15px', borderRadius: '10px', fontWeight: '900', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                     {turf.sport_type}
                                 </div>
@@ -106,7 +114,7 @@ const TurfListing = () => {
                                     </p>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: '1.6rem', fontWeight: '900', color: 'var(--primary)' }}>₹{turf.starting_price}</div>
+                                    <div style={{ fontSize: '1.6rem', fontWeight: '900', color: 'var(--primary)' }}>{formatINR(turf.starting_price)}</div>
                                     <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '800', textTransform: 'uppercase' }}>Per Hour</div>
                                 </div>
                             </div>

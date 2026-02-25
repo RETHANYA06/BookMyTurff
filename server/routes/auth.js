@@ -4,30 +4,38 @@ const Manager = require('../models/Manager');
 const Turf = require('../models/Turf');
 const bcrypt = require('bcryptjs');
 const TurfItem = require('../models/TurfItem');
+const Player = require('../models/Player'); // Added for global phone check
+const jwt = require('jsonwebtoken'); // Added for tokens
 const { generateSlotsForDate } = require('../utils/slotHelper');
 
 // Register Manager + Turf Onboarding
 router.post('/register', async (req, res) => {
     try {
         const {
-            name, phone, email, password,
+            name, phone_number, email, password,
             turf_name, image_url, location, google_map_link, sport_type, turf_size,
             opening_time, closing_time, slot_duration, max_players, days_open, base_price,
             rules_text, rental_items
         } = req.body;
 
-        console.log("Starting Manager Registration for:", email);
+        console.log("Starting Manager Registration for:", phone_number);
 
         // 1. Validations
-        let existingManager = await Manager.findOne({ $or: [{ email }, { phone }] });
-        if (existingManager) {
-            console.warn("Registration Attempt: Email or Phone already exists", { email, phone });
-            return res.status(400).json({ message: 'Email or Phone already registered' });
+        if (!/^[6-9]\d{9}$/.test(phone_number)) {
+            return res.status(400).json({ message: 'Invalid phone number format' });
+        }
+
+        let existingManager = await Manager.findOne({ phone_number });
+        let existingPlayer = await Player.findOne({ phone_number });
+
+        if (existingManager || existingPlayer) {
+            console.warn("Registration Attempt: Phone already exists globally", { phone_number });
+            return res.status(400).json({ message: 'Phone number already registered' });
         }
 
         // 2. Create Manager
         const hashedPassword = await bcrypt.hash(password, 10);
-        const manager = new Manager({ name, phone, email, password: hashedPassword });
+        const manager = new Manager({ name, phone_number, email, password: hashedPassword });
         await manager.save();
 
         // 3. Create Turf
@@ -86,11 +94,16 @@ router.post('/register', async (req, res) => {
         }
         await Promise.all(generatePromises);
 
+        // Create Session Token
+        const token = jwt.sign({ id: manager._id, role: manager.role || 'owner' }, 'your_jwt_secret', { expiresIn: '1d' });
+
         console.log("Manager Registration Successful:", manager._id);
         res.status(201).json({
+            token,
             manager_id: manager._id,
             turf_id: turf._id,
             name: manager.name,
+            role: manager.role || 'owner',
             turf_name: turf.turf_name
         });
     } catch (error) {
@@ -102,14 +115,22 @@ router.post('/register', async (req, res) => {
 // Login Manager
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const manager = await Manager.findOne({ email }).populate('turf_id');
+        const { phone_number, password } = req.body;
+
+        if (!/^[6-9]\d{9}$/.test(phone_number)) {
+            return res.status(400).json({ message: 'Invalid phone number format' });
+        }
+
+        const manager = await Manager.findOne({ phone_number }).populate('turf_id');
         if (!manager) return res.status(400).json({ message: 'Invalid credentials' });
 
         const isMatch = await bcrypt.compare(password, manager.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
+        const token = jwt.sign({ id: manager._id, role: manager.role || 'owner' }, 'your_jwt_secret', { expiresIn: '1d' });
+
         res.json({
+            token,
             manager_id: manager._id,
             turf_id: manager.turf_id?._id,
             name: manager.name,

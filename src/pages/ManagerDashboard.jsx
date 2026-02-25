@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { FiDollarSign, FiCalendar, FiTrendingUp, FiXCircle, FiSettings, FiGrid, FiFilter, FiCheckCircle, FiMinusCircle, FiActivity } from 'react-icons/fi';
+import { FiDollarSign, FiCalendar, FiTrendingUp, FiXCircle, FiSettings, FiGrid, FiFilter, FiCheckCircle, FiMinusCircle } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 import { Link } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
+import { formatINR, formatDate, formatTime } from '../utils/formatters';
 
 const ManagerDashboard = () => {
     const { manager } = useContext(AuthContext);
@@ -132,7 +134,7 @@ const ManagerDashboard = () => {
                         <span style={{ color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Total Revenue</span>
                         <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '10px', borderRadius: '14px', color: '#3b82f6' }}><FiDollarSign size={20} /></div>
                     </div>
-                    <h2 style={{ fontSize: '3rem', margin: '15px 0', color: 'var(--text-primary)', fontWeight: '900' }}>₹{stats.advanceCollected}</h2>
+                    <h2 style={{ fontSize: '3rem', margin: '15px 0', color: 'var(--text-primary)', fontWeight: '900' }}>{formatINR(stats.advanceCollected)}</h2>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem' }}>
                         Secured digital payments
                     </div>
@@ -140,9 +142,9 @@ const ManagerDashboard = () => {
                 <div className="glass" style={{ padding: '30px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '28px', background: 'rgba(255,255,255,0.02)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <span style={{ color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Pending Credits</span>
-                        <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '10px', borderRadius: '14px', color: '#f59e0b' }}><FiActivity size={20} /></div>
+                        <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '10px', borderRadius: '14px', color: '#f59e0b' }}><GiSoccerBall size={20} /></div>
                     </div>
-                    <h2 style={{ fontSize: '3rem', margin: '15px 0', color: 'var(--text-primary)', fontWeight: '900' }}>₹{stats.pendingPayments}</h2>
+                    <h2 style={{ fontSize: '3rem', margin: '15px 0', color: 'var(--text-primary)', fontWeight: '900' }}>{formatINR(stats.pendingPayments)}</h2>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', fontWeight: '800', fontSize: '0.85rem' }}>
                         Requires manual collection
                     </div>
@@ -197,7 +199,7 @@ const ManagerDashboard = () => {
                                     <tr key={b._id} style={{ background: 'rgba(255,255,255,0.02)' }}>
                                         <td style={{ padding: '20px 15px', borderRadius: '15px 0 0 15px' }}>
                                             <div style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '1.1rem' }}>{b.player_name}</div>
-                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>{b.phone} • {b.slot_ids?.[0]?.date}</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>{b.phone} • {formatDate(b.slot_ids?.[0]?.date)}</div>
                                             {b.rental_items?.length > 0 && (
                                                 <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                                                     {b.rental_items.map(ri => (
@@ -210,11 +212,9 @@ const ManagerDashboard = () => {
                                         </td>
                                         <td style={{ padding: '20px 15px' }}>
                                             <div style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: '700' }}>
-                                                {b.slot_ids?.[0]?.start_time} - {b.slot_ids?.[(b.slot_ids?.length || 0) - 1]?.end_time}
+                                                {formatTime(b.slot_ids?.[0]?.start_time)} - {formatTime(b.slot_ids?.[(b.slot_ids?.length || 0) - 1]?.end_time)}
                                             </div>
-                                            <div style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: '800', marginTop: '4px' }}>
-                                                ₹{b.slot_ids?.reduce((sum, s) => sum + (s.price || 0), 0)}
-                                            </div>
+                                            {formatINR(b.slot_ids?.reduce((sum, s) => sum + (s.price || 0), 0))}
                                         </td>
                                         <td style={{ padding: '20px 15px' }}>
                                             <span style={{

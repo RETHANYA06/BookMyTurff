@@ -2,7 +2,8 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiPhone, FiLock, FiUser, FiMail, FiMapPin, FiActivity, FiTarget, FiClock, FiUsers, FiCheckCircle, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
+import { FiPhone, FiLock, FiUser, FiMail, FiMapPin, FiTarget, FiClock, FiUsers, FiCheckCircle, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
 
 const PlayerRegister = () => {
@@ -35,9 +36,9 @@ const PlayerRegister = () => {
 
     const handleNext = () => {
         if (step === 1) {
-            if (!formData.full_name || !formData.phone_number || !formData.email || !formData.password || !formData.confirm_password) return alert('Please fill all required fields');
+            if (!formData.full_name || !formData.phone_number || !formData.password || !formData.confirm_password) return alert('Please fill all required fields');
             if (formData.password !== formData.confirm_password) return alert('Passwords do not match');
-            if (formData.phone_number.length < 10) return alert('Valid phone number required');
+            if (!/^[6-9]\d{9}$/.test(formData.phone_number)) return alert('Invalid phone number format');
         }
         if (step === 3) {
             if (formData.sports_played.length === 0) return alert('Please select at least one sport');
@@ -115,15 +116,28 @@ const PlayerRegister = () => {
                         </div>
 
                         <label>Phone Number</label>
-                        <div className="input-with-icon">
-                            <FiPhone icon_pos="left" />
-                            <input type="tel" value={formData.phone_number} onChange={e => setFormData({ ...formData, phone_number: e.target.value })} placeholder="10-digit number" required />
+                        <div className="phone-input-group">
+                            <div className="phone-prefix">+91</div>
+                            <div className="input-with-icon">
+                                <FiPhone />
+                                <input
+                                    type="tel"
+                                    value={formData.phone_number}
+                                    onChange={e => {
+                                        const val = e.target.value.replace(/\D/g, '');
+                                        if (val.length <= 10) setFormData({ ...formData, phone_number: val });
+                                    }}
+                                    placeholder="Enter 10-digit mobile"
+                                    required
+                                />
+                            </div>
                         </div>
+                        <small style={{ display: 'block', marginTop: '-15px', marginBottom: '20px', fontSize: '0.75rem', color: 'var(--text-secondary)', paddingLeft: '5px' }}>Must start with 6, 7, 8 or 9</small>
 
-                        <label>Email Address</label>
+                        <label>Email Address (Optional)</label>
                         <div className="input-with-icon">
                             <FiMail icon_pos="left" />
-                            <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="john@example.com" required />
+                            <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="john@example.com" />
                         </div>
 
                         <div className="grid">
@@ -287,6 +301,7 @@ const PlayerRegister = () => {
                     Already have an account? <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Login</Link>
                 </p>
             </div>
+
         </div>
     );
 };

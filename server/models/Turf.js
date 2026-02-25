@@ -15,7 +15,7 @@ const turfSchema = new mongoose.Schema({
     sport_type: { type: String, default: 'multi-sport' },
     turf_size: { type: String, enum: ['small', 'medium', 'large'], default: 'medium' },
     days_open: { type: [String], default: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
-    rating: { type: Number, default: 4.5 },
+    rating: { type: Number, default: null },
     reviews_count: { type: Number, default: 0 },
     coordinates: {
         lat: { type: Number, default: 19.0760 },

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Player = require('../models/Player');
+const Manager = require('../models/Manager'); // Added for global phone check
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -14,11 +15,19 @@ router.post('/register', async (req, res) => {
             willing_to_join_others, bring_own_equipment, notifications_opt_in
         } = req.body;
 
-        const existingPhone = await Player.findOne({ phone_number });
-        if (existingPhone) return res.status(400).json({ message: 'Phone number already registered' });
+        if (!/^[6-9]\d{9}$/.test(phone_number)) {
+            return res.status(400).json({ message: 'Invalid phone number format' });
+        }
 
-        const existingEmail = await Player.findOne({ email });
-        if (existingEmail) return res.status(400).json({ message: 'Email already registered' });
+        const existingPhone = await Player.findOne({ phone_number });
+        const existingManager = await Manager.findOne({ phone_number });
+
+        if (existingPhone || existingManager) return res.status(400).json({ message: 'Phone number already registered' });
+
+        if (email) {
+            const existingEmail = await Player.findOne({ email });
+            if (existingEmail) return res.status(400).json({ message: 'Email already registered' });
+        }
 
         if (!sports_played || sports_played.length === 0) {
             return res.status(400).json({ message: 'At least one sport must be selected' });
@@ -53,8 +62,13 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const player = await Player.findOne({ email });
+        const { phone_number, password } = req.body;
+
+        if (!/^[6-9]\d{9}$/.test(phone_number)) {
+            return res.status(400).json({ message: 'Invalid phone number format' });
+        }
+
+        const player = await Player.findOne({ phone_number });
         if (!player) return res.status(400).json({ message: 'Invalid credentials' });
 
         const isMatch = await bcrypt.compare(password, player.password);

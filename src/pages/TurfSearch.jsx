@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiMapPin, FiActivity, FiDollarSign, FiClock, FiArrowRight, FiFilter } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiDollarSign, FiClock, FiArrowRight, FiFilter } from 'react-icons/fi';
+import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
+import { formatINR, formatTime } from '../utils/formatters';
 
 const TurfSearch = () => {
     const [turfs, setTurfs] = useState([]);
@@ -71,7 +73,7 @@ const TurfSearch = () => {
                     />
                 </div>
                 <div style={{ flex: '0.8', minWidth: '150px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}><FiActivity size={16} color="var(--primary)" /> Discipline</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}><GiSoccerBall size={16} color="var(--primary)" /> Discipline</label>
                     <select
                         value={filters.sport_type}
                         onChange={e => setFilters({ ...filters, sport_type: e.target.value })}
@@ -88,7 +90,7 @@ const TurfSearch = () => {
                 <div style={{ flex: '1', minWidth: '200px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}><FiDollarSign size={16} color="var(--primary)" /> Budget Cap</label>
-                        <span style={{ color: 'var(--primary)', fontWeight: '900', fontSize: '0.85rem' }}>₹{filters.max_price}</span>
+                        <span style={{ color: 'var(--primary)', fontWeight: '900', fontSize: '0.85rem' }}>{formatINR(filters.max_price)}</span>
                     </div>
                     <input
                         type="range" min="300" max="2500" step="100"
@@ -138,7 +140,7 @@ const TurfSearch = () => {
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontWeight: '900', color: 'var(--primary)', fontSize: '1.4rem' }}>₹{turf.starting_price}</div>
+                                        <div style={{ fontWeight: '900', color: 'var(--primary)', fontSize: '1.4rem' }}>{formatINR(turf.starting_price)}</div>
                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Per Hour</div>
                                     </div>
                                 </div>
@@ -152,7 +154,7 @@ const TurfSearch = () => {
                                     </div>
                                     <div className="glass" style={{ flex: 1, padding: '15px', background: 'rgba(0,0,0,0.02)', borderRadius: '18px', border: '1px solid rgba(0,0,0,0.05)' }}>
                                         <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '5px' }}>Next Session</div>
-                                        <div style={{ fontWeight: '900', fontSize: '0.95rem', color: 'var(--text-primary)' }}>{turf.next_slot || '--:--'}</div>
+                                        <div style={{ fontWeight: '900', fontSize: '0.95rem', color: 'var(--text-primary)' }}>{turf.next_slot ? formatTime(turf.next_slot) : '--:--'}</div>
                                     </div>
                                 </div>
 
