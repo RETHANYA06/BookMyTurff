@@ -10,7 +10,7 @@ Follow these steps to start both the backend server and the frontend development
 2. **Start the Backend Server**
    // turbo
    `node server/index.js`
-   The server will run on `http://localhost:5000`.
+   The server will run on `https://bookmyturff.onrender.com`.
 
 3. **Start the Frontend Development Server**
    // turbo

@@ -15,7 +15,7 @@ const PlayerLogin = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/players/login', {
+            const res = await axios.post('https://bookmyturff.onrender.com/api/players/login', {
                 email,
                 password
             });

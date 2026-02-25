@@ -15,7 +15,7 @@ const CancelBooking = () => {
         setMessage({ type: '', text: '' });
 
         try {
-            const res = await axios.post('http://localhost:5000/api/bookings/public-cancel', formData);
+            const res = await axios.post('https://bookmyturff.onrender.com/api/bookings/public-cancel', formData);
             setMessage({ type: 'success', text: res.data.message });
             setTimeout(() => navigate('/'), 3000);
         } catch (err) {

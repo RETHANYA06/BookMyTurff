@@ -39,7 +39,7 @@ const TurfDetails = () => {
     }, [player]);
 
     const fetchTurfDetails = async () => {
-        const res = await axios.get(`http://localhost:5000/api/turfs/${id}`);
+        const res = await axios.get(`https://bookmyturff.onrender.com/api/turfs/${id}`);
         setTurf(res.data);
         setItems(res.data.items || []);
     };
@@ -47,7 +47,7 @@ const TurfDetails = () => {
     const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/slots/${id}?date=${date}`);
+            const res = await axios.get(`https://bookmyturff.onrender.com/api/slots/${id}?date=${date}`);
             setSlots(res.data);
         } finally {
             setLoadingSlots(false);
@@ -114,7 +114,7 @@ const TurfDetails = () => {
         if (selectedSlots.length === 0) return alert('Please select at least one slot');
 
         try {
-            const res = await axios.post('http://localhost:5000/api/bookings', {
+            const res = await axios.post('https://bookmyturff.onrender.com/api/bookings', {
                 turf_id: id,
                 slot_ids: selectedSlots.map(s => s._id),
                 ...formData,
@@ -138,7 +138,7 @@ const TurfDetails = () => {
 
         if (isSelected) {
             try {
-                await axios.post('http://localhost:5000/api/slots/unlock', { slotId: slot._id, playerId });
+                await axios.post('https://bookmyturff.onrender.com/api/slots/unlock', { slotId: slot._id, playerId });
                 setSelectedSlots(selectedSlots.filter(s => s._id !== slot._id));
                 if (selectedSlots.length === 1) setTimeLeft(0);
             } catch (err) {
@@ -154,7 +154,7 @@ const TurfDetails = () => {
         }
 
         try {
-            const res = await axios.post('http://localhost:5000/api/slots/lock', { slotId: slot._id, playerId });
+            const res = await axios.post('https://bookmyturff.onrender.com/api/slots/lock', { slotId: slot._id, playerId });
             const lockedSlot = res.data.slot;
 
             if (selectedSlots.length === 0) {
@@ -177,7 +177,7 @@ const TurfDetails = () => {
                 } else {
                     // Unlock old slots and start new selection
                     await Promise.all(selectedSlots.map(s =>
-                        axios.post('http://localhost:5000/api/slots/unlock', { slotId: s._id, playerId: player.id })
+                        axios.post('https://bookmyturff.onrender.com/api/slots/unlock', { slotId: s._id, playerId: player.id })
                     ));
                     setSelectedSlots([lockedSlot]);
                     setTimeLeft(180);

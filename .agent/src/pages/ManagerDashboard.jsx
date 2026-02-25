@@ -25,8 +25,8 @@ const ManagerDashboard = () => {
         setLoading(true); // Ensure loading is true when starting fresh fetch
         try {
             const [statsRes, bookingsRes] = await Promise.all([
-                axios.get(`http://localhost:5000/api/bookings/earnings/${manager.turf_id}`),
-                axios.get(`http://localhost:5000/api/bookings/${manager.turf_id}`)
+                axios.get(`https://bookmyturff.onrender.com/api/bookings/earnings/${manager.turf_id}`),
+                axios.get(`https://bookmyturff.onrender.com/api/bookings/${manager.turf_id}`)
             ]);
             setStats(statsRes.data);
             setBookings(bookingsRes.data);
@@ -66,13 +66,13 @@ const ManagerDashboard = () => {
         setLoading(true);
         try {
             if (action === 'complete') {
-                await axios.post(`http://localhost:5000/api/bookings/${id}/complete`);
+                await axios.post(`https://bookmyturff.onrender.com/api/bookings/${id}/complete`);
             } else if (action === 'confirm') {
-                await axios.put(`http://localhost:5000/api/bookings/${id}`, { status: 'booked' });
+                await axios.put(`https://bookmyturff.onrender.com/api/bookings/${id}`, { status: 'booked' });
             } else if (action === 'cancel') {
-                await axios.put(`http://localhost:5000/api/bookings/${id}`, { status: 'cancelled', cancel_reason: reason });
+                await axios.put(`https://bookmyturff.onrender.com/api/bookings/${id}`, { status: 'cancelled', cancel_reason: reason });
             } else if (action === 'paid') {
-                await axios.put(`http://localhost:5000/api/bookings/${id}`, { payment_status: 'fully_paid' });
+                await axios.put(`https://bookmyturff.onrender.com/api/bookings/${id}`, { payment_status: 'fully_paid' });
             }
             fetchData();
         } catch (err) {

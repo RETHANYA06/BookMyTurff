@@ -13,7 +13,7 @@ const MyBookings = () => {
         if (!player) return;
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/bookings/player/${player.id}`);
+            const res = await axios.get(`https://bookmyturff.onrender.com/api/bookings/player/${player.id}`);
             setBookings(res.data);
         } catch (err) {
             console.error(err);
@@ -39,7 +39,7 @@ const MyBookings = () => {
 
         if (!window.confirm('Are you sure you want to cancel this booking?')) return;
         try {
-            await axios.put(`http://localhost:5000/api/bookings/${booking._id}`, {
+            await axios.put(`https://bookmyturff.onrender.com/api/bookings/${booking._id}`, {
                 status: 'cancelled',
                 cancel_reason: 'cancelled_by_player'
             });

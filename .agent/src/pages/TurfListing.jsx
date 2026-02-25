@@ -30,7 +30,7 @@ const TurfListing = () => {
 
         const fetchTurfs = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/turfs');
+                const res = await axios.get('https://bookmyturff.onrender.com/api/turfs');
                 setTurfs(res.data);
             } catch (err) {
                 console.error(err);

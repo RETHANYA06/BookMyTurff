@@ -12,7 +12,7 @@ const ManagerTurfSetup = () => {
     useEffect(() => {
         if (!manager) return;
         const fetchData = async () => {
-            const res = await axios.get(`http://localhost:5000/api/turfs/${manager.turf_id}`);
+            const res = await axios.get(`https://bookmyturff.onrender.com/api/turfs/${manager.turf_id}`);
             setTurf(res.data);
             setItems(res.data.items || []);
         };
@@ -22,7 +22,7 @@ const ManagerTurfSetup = () => {
     const handleTurfUpdate = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`http://localhost:5000/api/turfs/${manager.turf_id}`, turf);
+            await axios.put(`https://bookmyturff.onrender.com/api/turfs/${manager.turf_id}`, turf);
             alert('Turf updated successfully');
         } catch (err) {
             alert('Update failed');
@@ -31,7 +31,7 @@ const ManagerTurfSetup = () => {
 
     const addItem = async () => {
         try {
-            const res = await axios.post(`http://localhost:5000/api/turfs/${manager.turf_id}/items`, newItem);
+            const res = await axios.post(`https://bookmyturff.onrender.com/api/turfs/${manager.turf_id}/items`, newItem);
             setItems([...items, res.data]);
             setNewItem({ item_name: '', rent_price: '' });
         } catch (err) {
@@ -41,7 +41,7 @@ const ManagerTurfSetup = () => {
 
     const deleteItem = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/turfs/items/${id}`);
+            await axios.delete(`https://bookmyturff.onrender.com/api/turfs/items/${id}`);
             setItems(items.filter(i => i._id !== id));
         } catch (err) {
             alert('Failed to delete item');

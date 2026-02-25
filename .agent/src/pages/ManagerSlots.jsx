@@ -14,7 +14,7 @@ const ManagerSlots = () => {
     const fetchSlots = async () => {
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/slots/${manager.turf_id}?date=${date}`);
+            const res = await axios.get(`https://bookmyturff.onrender.com/api/slots/${manager.turf_id}?date=${date}`);
             setSlots(res.data);
         } catch (err) {
             console.error(err);
@@ -29,7 +29,7 @@ const ManagerSlots = () => {
 
     const generateSlots = async () => {
         try {
-            await axios.post('http://localhost:5000/api/slots/generate', {
+            await axios.post('https://bookmyturff.onrender.com/api/slots/generate', {
                 turfId: manager.turf_id,
                 date
             });
@@ -41,7 +41,7 @@ const ManagerSlots = () => {
 
     const updateSlot = async (id, data) => {
         try {
-            await axios.put(`http://localhost:5000/api/slots/${id}`, data);
+            await axios.put(`https://bookmyturff.onrender.com/api/slots/${id}`, data);
             fetchSlots();
         } catch (err) {
             alert('Update failed');

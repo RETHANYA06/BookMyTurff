@@ -25,7 +25,7 @@ const TurfSearch = () => {
                 max_price: filters.max_price,
                 available_today: filters.available_today
             }).toString();
-            const res = await axios.get(`http://localhost:5000/api/turfs?${query}`);
+            const res = await axios.get(`https://bookmyturff.onrender.com/api/turfs?${query}`);
             setTurfs(res.data);
         } catch (err) {
             console.error(err);

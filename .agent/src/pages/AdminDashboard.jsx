@@ -18,7 +18,7 @@ const AdminDashboard = () => {
         setLoading(true);
         try {
             // We need an endpoint to get ALL bookings
-            const res = await axios.get('http://localhost:5000/api/bookings/admin/all');
+            const res = await axios.get('https://bookmyturff.onrender.com/api/bookings/admin/all');
             setBookings(res.data);
 
             // Calculate Stats

@@ -24,7 +24,7 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const endpoint = role === 'player' ? 'http://localhost:5000/api/players/login' : 'http://localhost:5000/api/auth/login';
+            const endpoint = role === 'player' ? 'https://bookmyturff.onrender.com/api/players/login' : 'https://bookmyturff.onrender.com/api/auth/login';
             const res = await axios.post(endpoint, { email, password });
 
             const userData = role === 'player'

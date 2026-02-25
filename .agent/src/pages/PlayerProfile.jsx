@@ -24,7 +24,7 @@ const PlayerProfile = () => {
         setLoading(true);
         setMessage('');
         try {
-            const res = await axios.put(`http://localhost:5000/api/players/profile/${player.id}`, formData);
+            const res = await axios.put(`https://bookmyturff.onrender.com/api/players/profile/${player.id}`, formData);
             login({ ...res.data.player, role: 'player' });
             setMessage('Profile updated successfully!');
             setTimeout(() => setMessage(''), 3000);

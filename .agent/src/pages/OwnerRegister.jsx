@@ -64,7 +64,7 @@ const OwnerRegister = () => {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/register', formData);
+            const res = await axios.post('https://bookmyturff.onrender.com/api/auth/register', formData);
             login({ ...res.data, role: 'owner', id: res.data.manager_id || res.data._id });
             navigate('/manager/dashboard');
         } catch (err) {

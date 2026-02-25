@@ -38,10 +38,10 @@ const PlayerDashboard = () => {
             }).toString();
 
             const [turfRes, dashRes, availRes, historyRes] = await Promise.all([
-                axios.get(`http://localhost:5000/api/turfs?${query}`),
-                axios.get(`http://localhost:5000/api/bookings/player-dashboard/${player.id}`),
-                axios.get(`http://localhost:5000/api/turfs/available-today/list`),
-                axios.get(`http://localhost:5000/api/bookings/player/${player.id}`)
+                axios.get(`https://bookmyturff.onrender.com/api/turfs?${query}`),
+                axios.get(`https://bookmyturff.onrender.com/api/bookings/player-dashboard/${player.id}`),
+                axios.get(`https://bookmyturff.onrender.com/api/turfs/available-today/list`),
+                axios.get(`https://bookmyturff.onrender.com/api/bookings/player/${player.id}`)
             ]);
 
             setTurfs(turfRes.data);
@@ -74,7 +74,7 @@ const PlayerDashboard = () => {
 
         if (!window.confirm('Are you sure you want to cancel this booking?')) return;
         try {
-            await axios.put(`http://localhost:5000/api/bookings/${booking._id}`, {
+            await axios.put(`https://bookmyturff.onrender.com/api/bookings/${booking._id}`, {
                 status: 'cancelled',
                 cancel_reason: 'cancelled_by_player'
             });
