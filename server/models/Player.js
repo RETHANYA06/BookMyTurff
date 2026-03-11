@@ -23,7 +23,7 @@ const playerSchema = new mongoose.Schema({
     willing_to_join_others: { type: Boolean, default: false },
     bring_own_equipment: { type: Boolean, default: false },
     notifications_opt_in: { type: Boolean, default: true },
-    role: { type: String, default: 'player' }
+    role: { type: String, enum: ['admin', 'owner', 'user'], default: 'user' }
 }, { timestamps: true });
 
 playerSchema.pre('save', async function () {

@@ -2,11 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { FiSave, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
 import { formatINR } from '../utils/formatters';
 
 const ManagerTurfSetup = () => {
-    const { manager } = useContext(AuthContext);
+    const { manager, updateUser } = useContext(AuthContext);
+    const navigate = useNavigate();
     const [turf, setTurf] = useState(null);
     const [items, setItems] = useState([]);
     const [newItem, setNewItem] = useState({ item_name: '', rent_price: '' });
@@ -14,9 +16,22 @@ const ManagerTurfSetup = () => {
     useEffect(() => {
         if (!manager) return;
         const fetchData = async () => {
-            const res = await axios.get(`${API_BASE_URL}/api/turfs/${manager.turf_id}`);
-            setTurf(res.data);
-            setItems(res.data.items || []);
+            if (!manager.turf_id) {
+                setTurf({ 
+                    turf_name: '', location: '', image_url: '', 
+                    opening_time: '06:00', closing_time: '22:00', 
+                    slot_duration: 60, max_players: 22, base_price: 500, 
+                    sport_type: 'Football', rules_text: '' 
+                });
+                return;
+            }
+            try {
+                const res = await axios.get(`${API_BASE_URL}/api/turfs/${manager.turf_id}`);
+                setTurf(res.data);
+                setItems(res.data.items || []);
+            } catch (err) {
+                console.error(err);
+            }
         };
         fetchData();
     }, [manager]);
@@ -24,14 +39,27 @@ const ManagerTurfSetup = () => {
     const handleTurfUpdate = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`${API_BASE_URL}/api/turfs/${manager.turf_id}`, turf);
-            alert('Turf updated successfully');
+            const token = localStorage.getItem('token');
+            if (manager.turf_id) {
+                await axios.put(`${API_BASE_URL}/api/turfs/${manager.turf_id}`, turf, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                alert('Turf updated successfully');
+            } else {
+                const res = await axios.post(`${API_BASE_URL}/api/turfs`, turf, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                alert('Turf created successfully!');
+                updateUser({ turf_id: res.data.turf._id, turf_name: res.data.turf.turf_name });
+                navigate('/manager/dashboard');
+            }
         } catch (err) {
-            alert('Update failed');
+            alert(err.response?.data?.message || 'Operation failed');
         }
     };
 
     const addItem = async () => {
+        if (!manager.turf_id) return alert('Please create your turf first before adding items!');
         try {
             const res = await axios.post(`${API_BASE_URL}/api/turfs/${manager.turf_id}/items`, newItem);
             setItems([...items, res.data]);
@@ -148,7 +176,7 @@ const ManagerTurfSetup = () => {
                     ></textarea>
 
                     <button className="btn btn-primary" style={{ marginTop: '20px', width: '100%' }}>
-                        <FiSave /> Save Changes
+                        <FiSave /> {manager.turf_id ? 'Save Changes' : 'Create Turf'}
                     </button>
                 </form>
             </div>

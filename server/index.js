@@ -13,12 +13,14 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
+app.use('/api', require('./routes/unified_auth')); // Unified login and register
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/players', require('./routes/players'));
 app.use('/api/turfs', require('./routes/turfs'));
 app.use('/api/slots', require('./routes/slots'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/admin', require('./routes/admin'));
 app.get("/", (req, res) => {
     res.send("BookMyTurf Backend is Running 🚀");
 });

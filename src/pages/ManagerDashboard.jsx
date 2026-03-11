@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { FiDollarSign, FiCalendar, FiTrendingUp, FiXCircle, FiSettings, FiGrid, FiFilter, FiCheckCircle, FiMinusCircle } from 'react-icons/fi';
+import { FiDollarSign, FiCalendar, FiTrendingUp, FiXCircle, FiSettings, FiGrid, FiFilter, FiCheckCircle, FiMinusCircle, FiPlus, FiActivity } from 'react-icons/fi';
 import { GiSoccerBall } from 'react-icons/gi';
 import { Link } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
@@ -88,18 +88,41 @@ const ManagerDashboard = () => {
     if (!manager) return <div style={{ textAlign: 'center', marginTop: '100px' }}>Please login to access dashboard</div>;
 
     if (loading && !stats) return (
-        <div style={{ textAlign: 'center', marginTop: '100px' }}>
-            <div className="loader" style={{ borderColor: 'var(--primary)', marginBottom: '20px' }}></div>
-            <h2>Preparing your dashboard...</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>Gathering data for {manager.turf_name}</p>
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+            <div className="loader" style={{ width: '60px', height: '60px', borderWidth: '5px', borderColor: 'var(--primary)', borderTopColor: 'transparent', marginBottom: '30px' }}></div>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: '800' }}>Synchronizing Dashboard...</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Fetching live data for {manager.turf_name || 'your venue'}</p>
         </div>
     );
 
     if (!stats) return (
-        <div style={{ textAlign: 'center', marginTop: '100px' }}>
-            <h2>Welcome, {manager.name}</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '30px' }}>We're setting up your turf stats.</p>
-            <button className="btn btn-primary" onClick={fetchData}>Refresh Dashboard</button>
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', textAlign: 'center', padding: '0 20px' }}>
+            <div className="animate-float" style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '30px', borderRadius: '40px', marginBottom: '40px', boxShadow: '0 20px 40px rgba(16, 185, 129, 0.1)' }}>
+                <GiSoccerBall size={80} />
+            </div>
+            <h1 style={{ fontSize: '3.5rem', marginBottom: '15px' }}>Welcome, {manager.full_name || manager.name}!</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.3rem', maxWidth: '600px', lineHeight: '1.6', marginBottom: '45px', fontWeight: '500' }}>
+                {manager.turf_id 
+                    ? `Your venue "${manager.turf_name}" is now live! We're preparing your analytics dashboard.` 
+                    : "Your journey starts here. Create your turf profile to begin managing bookings and slots."}
+            </p>
+            
+            <div style={{ display: 'flex', gap: '20px' }}>
+                {!manager.turf_id ? (
+                    <Link to="/manager/setup" className="btn btn-primary animate-pulse" style={{ padding: '20px 40px', fontSize: '1.1rem' }}>
+                         <FiPlus size={22} /> Create Your Turf Profile
+                    </Link>
+                ) : (
+                    <>
+                        <button className="btn btn-primary" onClick={fetchData} style={{ padding: '20px 40px' }}>
+                            <FiActivity size={22} /> Refresh Live Stats
+                        </button>
+                        <Link to="/manager/setup" className="btn btn-outline" style={{ padding: '20px 40px', color: 'var(--text-primary)' }}>
+                            <FiSettings size={22} /> Configuration
+                        </Link>
+                    </>
+                )}
+            </div>
         </div>
     );
 

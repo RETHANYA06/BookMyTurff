@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiUser, FiArrowRight, FiCheck } from 'react-icons/fi';
+import { FiUser, FiArrowRight, FiCheck, FiLayout, FiShield } from 'react-icons/fi';
 import { GiSoccerBall } from 'react-icons/gi';
 
 const Register = () => {
@@ -19,29 +19,37 @@ const Register = () => {
         {
             id: 'owner',
             title: 'Turf Owner',
-            description: 'List your turf, manage bookings, and grow your sports business.',
-            icon: <GiSoccerBall size={32} />,
-            color: '#0ea5e9', // Sky blue for owner
-            path: '/owner-register'
+            description: 'Secure system access for turf managers and facility owners.',
+            icon: <FiLayout size={32} />,
+            color: '#3b82f6',
+            path: '/login'
+        },
+        {
+            id: 'admin',
+            title: 'System Admin',
+            description: 'Administrative terminal for platform management and oversight.',
+            icon: <FiShield size={32} />,
+            color: '#ef4444',
+            path: '/login'
         }
     ];
 
     return (
-        <div style={{ maxWidth: '1000px', margin: '100px auto', padding: '0 20px' }} className="fade-in">
-            <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+        <div style={{ maxWidth: '1200px', margin: '80px auto', padding: '0 20px' }} className="fade-in">
+            <div style={{ textAlign: 'center', marginBottom: '60px' }}>
                 <span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '4px', background: 'rgba(16, 185, 129, 0.1)', padding: '8px 20px', borderRadius: '40px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>Onboarding Protocol</span>
-                <h1 style={{ fontSize: '4rem', color: 'var(--text-primary)', fontWeight: '900', letterSpacing: '-2px', marginTop: '20px', lineHeight: '1' }}>JOIN THE <span className="text-glow" style={{ color: 'var(--primary)' }}>NETWORK</span></h1>
+                <h1 style={{ fontSize: '3.5rem', color: 'var(--text-primary)', fontWeight: '900', letterSpacing: '-2px', marginTop: '20px', lineHeight: '1.1' }}>JOIN THE <span className="text-glow" style={{ color: 'var(--primary)' }}>NETWORK</span></h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginTop: '15px', fontWeight: '500' }}>Define your objective to initialize deployment.</p>
             </div>
 
-            <div className="grid" style={{ gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', gap: '40px' }}>
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px' }}>
                 {roles.map(role => (
                     <div
                         key={role.id}
                         onClick={() => setSelected(role.id)}
                         className="glass-heavy card-hover"
                         style={{
-                            padding: '60px 50px',
+                            padding: '40px 30px',
                             borderRadius: '40px',
                             cursor: 'pointer',
                             border: selected === role.id ? `2px solid ${role.color}` : '1px solid var(--border-subtle)',

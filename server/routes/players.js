@@ -37,12 +37,13 @@ router.post('/register', async (req, res) => {
             full_name, phone_number, password, email,
             age_group, gender, city, preferred_language,
             sports_played, skill_level, preferred_play_time, typical_group_size,
-            willing_to_join_others, bring_own_equipment, notifications_opt_in
+            willing_to_join_others, bring_own_equipment, notifications_opt_in,
+            role: 'user' // Explicitly set role user
         });
         await player.save();
 
         // Auto login after registration
-        const token = jwt.sign({ id: player._id, role: 'player' }, 'your_jwt_secret', { expiresIn: '1d' });
+        const token = jwt.sign({ id: player._id, role: 'user' }, 'your_jwt_secret', { expiresIn: '1d' });
 
         res.status(201).json({
             message: 'Registration successful',
@@ -50,7 +51,8 @@ router.post('/register', async (req, res) => {
             player: {
                 id: player._id,
                 full_name: player.full_name,
-                phone_number: player.phone_number
+                phone_number: player.phone_number,
+                role: 'user'
             }
         });
     } catch (error) {
@@ -74,14 +76,14 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, player.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-        const token = jwt.sign({ id: player._id, role: 'player' }, 'your_jwt_secret', { expiresIn: '1d' });
+        const token = jwt.sign({ id: player._id, role: player.role || 'user' }, 'your_jwt_secret', { expiresIn: '1d' });
         res.json({
             token,
             player: {
                 id: player._id,
                 full_name: player.full_name,
                 phone_number: player.phone_number,
-                role: player.role || 'player'
+                role: player.role || 'user'
             }
         });
     } catch (error) {

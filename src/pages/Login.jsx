@@ -8,8 +8,10 @@ import API_BASE_URL from '../config/api';
 
 const Login = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('player'); // Default to player
+    const [registrationId, setRegistrationId] = useState('');
+    const [role, setRole] = useState('player'); // player, owner, admin
     const [loading, setLoading] = useState(false);
     const { user, login } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -26,12 +28,14 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const endpoint = role === 'player' ? `${API_BASE_URL}/api/players/login` : `${API_BASE_URL}/api/auth/login`;
-            const res = await axios.post(endpoint, { phone_number: phoneNumber, password });
+            const endpoint = `${API_BASE_URL}/api/login`;
+            const payload = role === 'admin' 
+                ? { email: email.trim(), password } 
+                : { phone_number: phoneNumber.trim(), password };
 
-            const userData = role === 'player'
-                ? { ...res.data.player, role: res.data.player.role || 'player', id: res.data.player.id || res.data.player._id }
-                : { ...res.data, role: res.data.role || 'owner', id: res.data.manager_id || res.data._id };
+            const res = await axios.post(endpoint, payload);
+
+            const userData = res.data.user;
 
             if (res.data.token) {
                 localStorage.setItem('token', res.data.token);
@@ -67,54 +71,60 @@ const Login = () => {
 
                 {/* Role Switcher */}
                 <div style={{ display: 'flex', background: 'rgba(0,0,0,0.03)', padding: '6px', borderRadius: '20px', marginBottom: '40px', border: '1px solid rgba(0,0,0,0.05)' }}>
-                    <button
-                        onClick={() => setRole('player')}
-                        style={{
-                            flex: 1, padding: '14px', borderRadius: '16px', border: 'none',
-                            background: role === 'player' ? 'var(--primary)' : 'transparent',
-                            fontWeight: '800', cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                            color: role === 'player' ? '#0f172a' : 'var(--text-secondary)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                            fontSize: '0.95rem'
-                        }}
-                    >
-                        <FiUser size={18} /> Player
-                    </button>
-                    <button
-                        onClick={() => setRole('owner')}
-                        style={{
-                            flex: 1, padding: '14px', borderRadius: '16px', border: 'none',
-                            background: role === 'owner' ? 'var(--primary)' : 'transparent',
-                            fontWeight: '800', cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                            color: role === 'owner' ? '#0f172a' : 'var(--text-secondary)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                            fontSize: '0.95rem'
-                        }}
-                    >
-                        <FiLayout size={18} /> Owner
-                    </button>
+                    {['player', 'owner', 'admin'].map(r => (
+                        <button
+                            key={r}
+                            onClick={() => setRole(r)}
+                            style={{
+                                flex: 1, padding: '12px', borderRadius: '16px', border: 'none',
+                                background: role === r ? 'var(--primary)' : 'transparent',
+                                fontWeight: '800', cursor: 'pointer', transition: 'all 0.3s',
+                                color: role === r ? '#0f172a' : 'var(--text-secondary)',
+                                fontSize: '0.85rem', textTransform: 'capitalize'
+                            }}
+                        >
+                            {r}
+                        </button>
+                    ))}
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '25px' }}>
-                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Phone Number</label>
-                        <div className="phone-input-group">
-                            <div className="phone-prefix">+91</div>
+                    {role === 'admin' ? (
+                        <div style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Email Address</label>
                             <div className="input-with-icon">
-                                <FiPhone />
+                                <FiUser />
                                 <input
-                                    type="tel"
-                                    value={phoneNumber}
-                                    onChange={e => {
-                                        const value = e.target.value.replace(/\D/g, '');
-                                        if (value.length <= 10) setPhoneNumber(value);
-                                    }}
-                                    placeholder="Mobile number"
+                                    type="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    placeholder="admin@bookmyturf.com"
                                     required
                                 />
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Phone Number</label>
+                            <div className="phone-input-group">
+                                <div className="phone-prefix">+91</div>
+                                <div className="input-with-icon">
+                                    <FiPhone />
+                                    <input
+                                        type="tel"
+                                        value={phoneNumber}
+                                        onChange={e => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            if (value.length <= 10) setPhoneNumber(value);
+                                        }}
+                                        placeholder="Mobile number"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
 
                     <div style={{ marginBottom: '35px' }}>
                         <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Secure Key</label>

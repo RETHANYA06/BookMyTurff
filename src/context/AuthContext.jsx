@@ -18,6 +18,14 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
     };
 
+    const updateUser = (newData) => {
+        setUser(prev => {
+            const updated = { ...prev, ...newData };
+            localStorage.setItem('user', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
     const logout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
@@ -26,10 +34,10 @@ export const AuthProvider = ({ children }) => {
 
     // Derived states for backward compatibility (if needed) or easier access
     const manager = user?.role === 'owner' || user?.role === 'admin' ? user : null;
-    const player = user?.role === 'player' ? user : null;
+    const player = (user?.role === 'player' || user?.role === 'user') ? user : null;
 
     return (
-        <AuthContext.Provider value={{ user, manager, player, login, logout }}>
+        <AuthContext.Provider value={{ user, manager, player, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

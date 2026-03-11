@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import Home from './pages/Home';
 import TurfDetails from './pages/TurfDetails';
@@ -19,7 +19,7 @@ import PlayerDashboard from './pages/PlayerDashboard';
 import PlayerProfile from './pages/PlayerProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import AccessDenied from './pages/AccessDenied';
-import { FiHome, FiUser, FiLogOut, FiLayout, FiSearch, FiList, FiSettings } from 'react-icons/fi';
+import { FiHome, FiUser, FiLogOut, FiLayout, FiSearch, FiList, FiSettings, FiMonitor, FiUsers } from 'react-icons/fi';
 import { GiSoccerBall } from 'react-icons/gi';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -32,6 +32,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 const Navbar = () => {
   const { user, manager, player, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <nav className="glass-heavy fade-in" style={{
@@ -66,8 +67,12 @@ const Navbar = () => {
         </Link>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <Link to={player ? "/player/dashboard" : "/"} className="btn btn-primary" style={{ padding: '12px 25px', borderRadius: '16px', fontSize: '0.95rem' }}>Home</Link>
-          <Link to="/login" className="btn btn-primary" style={{ padding: '12px 25px', borderRadius: '16px', fontSize: '0.95rem' }}>Login</Link>
+          {!user && (
+            <>
+              <Link to="/" className="btn btn-primary" style={{ padding: '12px 25px', borderRadius: '16px', fontSize: '0.95rem' }}>Home</Link>
+              <Link to="/login" className="btn btn-primary" style={{ padding: '12px 25px', borderRadius: '16px', fontSize: '0.95rem' }}>Login</Link>
+            </>
+          )}
 
           {player && (
             <>
@@ -80,6 +85,14 @@ const Navbar = () => {
             <Link to="/manager/dashboard" className="btn-outline" style={{ padding: '10px 18px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700' }}><FiLayout size={18} /> Command Center</Link>
           )}
 
+          {user?.role === 'admin' && location.pathname !== '/admin-panel' && (
+            <Link to="/admin-panel" className="btn-outline" style={{ padding: '10px 18px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700' }}><FiMonitor size={18} /> Admin Panel</Link>
+          )}
+
+          {user?.role === 'admin' && (
+            <Link to="/admin-panel?view=owners" className="btn-outline" style={{ padding: '10px 18px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700' }}><FiUsers size={18} /> Owner Accounts</Link>
+          )}
+
           <div style={{ marginLeft: '20px', borderLeft: '1px solid var(--border-subtle)', paddingLeft: '25px', display: 'flex', alignItems: 'center', gap: '20px' }}>
             {user ? (
               <>
@@ -89,8 +102,19 @@ const Navbar = () => {
                     {user.role === 'owner' ? 'Pro Partner' : user.role === 'admin' ? 'System Architect' : 'Elite Striker'}
                   </span>
                 </div>
-                <button onClick={() => { logout(); navigate('/'); }} className="btn-outline box-btn" style={{ background: 'rgba(239,68,68,0.05)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.1)' }}>
-                  <FiLogOut size={20} />
+                <button onClick={() => { logout(); navigate('/'); }} className="btn-outline" style={{ 
+                  background: 'rgba(239,68,68,0.05)', 
+                  color: 'var(--danger)', 
+                  border: '1px solid rgba(239,68,68,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  borderRadius: '14px',
+                  fontSize: '0.9rem',
+                  fontWeight: '800'
+                }}>
+                  <FiLogOut size={18} /> LOGOUT
                 </button>
               </>
             ) : (
@@ -105,7 +129,7 @@ const Navbar = () => {
 
 const HomeRedirect = () => {
   const { user } = useContext(AuthContext);
-  if (user?.role === 'player') return <Navigate to="/player/dashboard" />;
+  if (user?.role === 'user' || user?.role === 'player') return <Navigate to="/player/dashboard" />;
   if (user?.role === 'owner' || user?.role === 'admin') return <Navigate to="/manager/dashboard" />;
   return <Home />;
 };
@@ -118,20 +142,20 @@ const App = () => {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomeRedirect />} />
-          <Route path="/turf/:id" element={<ProtectedRoute allowedRoles={['player']}><TurfDetails /></ProtectedRoute>} />
-          <Route path="/turf-search" element={<ProtectedRoute allowedRoles={['player']}><TurfSearch /></ProtectedRoute>} />
+          <Route path="/turf/:id" element={<ProtectedRoute allowedRoles={['user', 'player']}><TurfDetails /></ProtectedRoute>} />
+          <Route path="/turf-search" element={<ProtectedRoute allowedRoles={['user', 'player']}><TurfSearch /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/player-login" element={<Navigate to="/login" />} />
           <Route path="/player-register" element={<PlayerRegister />} />
-          <Route path="/owner-register" element={<OwnerRegister />} />
+          {/* Owner Registration UI Removed */}
           <Route path="/register" element={<Register />} />
-          <Route path="/my-bookings" element={<ProtectedRoute allowedRoles={['player']}><MyBookings /></ProtectedRoute>} />
-          <Route path="/cancel-booking" element={<ProtectedRoute allowedRoles={['player']}><CancelBooking /></ProtectedRoute>} />
+          <Route path="/my-bookings" element={<ProtectedRoute allowedRoles={['user', 'player']}><MyBookings /></ProtectedRoute>} />
+          <Route path="/cancel-booking" element={<ProtectedRoute allowedRoles={['user', 'player']}><CancelBooking /></ProtectedRoute>} />
 
           {/* Player Routes */}
-          <Route path="/player/dashboard" element={<ProtectedRoute allowedRoles={['player']}><PlayerDashboard /></ProtectedRoute>} />
-          <Route path="/player/turfs" element={<ProtectedRoute allowedRoles={['player']}><TurfListing /></ProtectedRoute>} />
-          <Route path="/player/profile" element={<ProtectedRoute allowedRoles={['player']}><PlayerProfile /></ProtectedRoute>} />
+          <Route path="/player/dashboard" element={<ProtectedRoute allowedRoles={['user', 'player']}><PlayerDashboard /></ProtectedRoute>} />
+          <Route path="/player/turfs" element={<ProtectedRoute allowedRoles={['user', 'player']}><TurfListing /></ProtectedRoute>} />
+          <Route path="/player/profile" element={<ProtectedRoute allowedRoles={['user', 'player']}><PlayerProfile /></ProtectedRoute>} />
 
           {/* Manager Routes */}
           <Route path="/manager/dashboard" element={<ProtectedRoute allowedRoles={['owner', 'admin']}><ManagerDashboard /></ProtectedRoute>} />

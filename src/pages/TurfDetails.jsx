@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
@@ -171,7 +171,7 @@ const TurfDetails = () => {
 
     const handleBooking = async (e) => {
         if (e) e.preventDefault();
-        if (!player || player.role !== 'player') {
+        if (!player || (player.role !== 'player' && player.role !== 'user')) {
             return alert('Only registered players can book turfs.');
         }
         if (!formData.rules_confirmed) return alert('Please confirm rules first');
@@ -517,7 +517,7 @@ const TurfDetails = () => {
                             </div>
 
                             {/* Write a Review */}
-                            {player && player.role === 'player' ? (
+                            {player && (player.role === 'player' || player.role === 'user') ? (
                                 hasReviewed ? (
                                     <div style={{ padding: '30px', background: 'rgba(16, 185, 129, 0.06)', borderRadius: '24px', border: '1px solid rgba(16, 185, 129, 0.15)', marginBottom: '40px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>

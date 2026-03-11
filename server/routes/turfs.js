@@ -22,6 +22,102 @@ router.post('/upload', upload.single('image'), (req, res) => {
     res.json({ imageUrl });
 });
 
+const jwt = require('jsonwebtoken');
+
+// Middleware to authorize Owner
+const authenticateOwner = async (req, res, next) => {
+    try {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        if (!token) return res.status(401).json({ message: 'Authentication required' });
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        if (decoded.role !== 'owner') {
+            return res.status(403).json({ message: 'Only turf owners can create turfs' });
+        }
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({ message: 'Invalid token' });
+    }
+};
+
+const Manager = require('../models/Manager');
+const { generateSlotsForDate } = require('../utils/slotHelper');
+
+// Create a new Turf (Owner only)
+router.post('/', authenticateOwner, async (req, res) => {
+    try {
+        if (req.user.role !== 'owner') {
+            return res.status(403).json({ message: 'Only turf owners can create turfs' });
+        }
+
+        const {
+            turf_name, image_url, location, google_map_link, sport_type, turf_size,
+            opening_time, closing_time, slot_duration, max_players, days_open, base_price,
+            rules_text, rental_items
+        } = req.body;
+
+        const managerId = req.user.id;
+
+        const turf = new Turf({
+            turf_name,
+            image_url,
+            location,
+            google_map_link,
+            sport_type,
+            turf_size,
+            opening_time,
+            closing_time,
+            slot_duration: parseInt(slot_duration) || 60,
+            max_players: parseInt(max_players) || 22,
+            base_price: parseInt(base_price) || 500,
+            days_open: days_open || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            rules_text,
+            manager_id: managerId
+        });
+        
+        await turf.save();
+
+        // Update Manager with turf ID
+        await Manager.findByIdAndUpdate(managerId, { turf_id: turf._id });
+
+        if (rental_items && rental_items.length > 0) {
+            const items = rental_items.map(item => ({
+                turf_id: turf._id,
+                item_name: item.item_name,
+                rent_price: item.rent_price
+            }));
+            await TurfItem.insertMany(items);
+        }
+
+        const generatePromises = [];
+        const daysToGenerate = 7;
+
+        for (let i = 0; i < daysToGenerate; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() + i);
+            const dateStr = d.toLocaleDateString('en-CA');
+
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+            if (turf.days_open && turf.days_open.includes(dayName)) {
+                generatePromises.push(generateSlotsForDate(
+                    turf._id,
+                    dateStr,
+                    opening_time || '06:00',
+                    closing_time || '22:00',
+                    parseInt(base_price) || 500,
+                    parseInt(slot_duration) || 60
+                ));
+            }
+        }
+        await Promise.all(generatePromises);
+
+        res.status(201).json({ message: 'Turf created successfully', turf });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get all turfs with summary (Public with Search/Filter)
 router.get('/', async (req, res) => {
     try {

@@ -9,6 +9,8 @@ const { generateSlotsForDate } = require('../utils/slotHelper');
 router.get('/:turfId', async (req, res) => {
     try {
         const { date } = req.query;
+        if (!date) return res.status(400).json({ message: 'Date is required' });
+
         const now = new Date();
         const lockDuration = 3 * 60 * 1000; // 3 minutes
 
@@ -24,7 +26,28 @@ router.get('/:turfId', async (req, res) => {
             }
         );
 
-        const slots = await Slot.find({ turf_id: req.params.turfId, date }).sort({ start_time: 1 });
+        let slots = await Slot.find({ turf_id: req.params.turfId, date }).sort({ start_time: 1 });
+
+        // Lazy generation: if no slots for this date, try to generate them
+        if (slots.length === 0) {
+            const turf = await Turf.findById(req.params.turfId);
+            if (turf) {
+                const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+                if (turf.days_open.includes(dayName)) {
+                    await generateSlotsForDate(
+                        turf._id,
+                        date,
+                        turf.opening_time || '06:00',
+                        turf.closing_time || '22:00',
+                        turf.base_price || 500,
+                        turf.slot_duration || 60
+                    );
+                    // Fetch again after generation
+                    slots = await Slot.find({ turf_id: req.params.turfId, date }).sort({ start_time: 1 });
+                }
+            }
+        }
+
         res.json(slots);
     } catch (error) {
         res.status(500).json({ message: error.message });

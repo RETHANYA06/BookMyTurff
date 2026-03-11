@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const managerSchema = new mongoose.Schema({
     name: { type: String, required: true },
     phone_number: { type: String, required: true, unique: true },
+    registration_id: { type: String, required: true, unique: true }, // Added for admin-controlled registration
     email: { type: String, default: null },
     password: { type: String, required: true },
     turf_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Turf', default: null },

@@ -61,11 +61,11 @@ const PlayerRegister = () => {
         if (e) e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post(`${API_BASE_URL}/api/players/register`, formData);
+            const res = await axios.post(`${API_BASE_URL}/api/register`, formData);
             const playerWithRole = {
-                ...res.data.player,
-                role: 'player',
-                id: res.data.player.id || res.data.player._id
+                ...res.data.user,
+                role: res.data.role,
+                id: res.data.user.id || res.data.user._id
             };
             login(playerWithRole);
             localStorage.setItem('token', res.data.token);

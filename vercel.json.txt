@@ -1,8 +1,12 @@
 {
   "rewrites": [
+HEAD
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
+
+    { "source": "/(.*)", "destination": "/" }
+ 59c7372 (Updated owner authentication system)
   ]
 }
