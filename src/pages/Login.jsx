@@ -33,20 +33,8 @@ const Login = () => {
                 ? { email: email.trim(), password } 
                 : { phone_number: phoneNumber.trim(), password };
 
-            try {
-                // Try unified endpoint first
-                res = await axios.post(`${API_BASE_URL}/api/login`, payload);
-            } catch (unifiedErr) {
-                // If 404, fallback to specialized endpoints (older deployments)
-                if (unifiedErr.response?.status === 404) {
-                    const fallbackEndpoint = role === 'player' 
-                        ? `${API_BASE_URL}/api/players/login` 
-                        : `${API_BASE_URL}/api/auth/login`;
-                    res = await axios.post(fallbackEndpoint, payload);
-                } else {
-                    throw unifiedErr;
-                }
-            }
+            // Use unified login endpoint
+            res = await axios.post(`${API_BASE_URL}/api/login`, payload);
 
             // Extract user data from various possible response shapes
             const userData = res.data.user || res.data.player || {

@@ -28,6 +28,9 @@ router.post('/login', async (req, res) => {
             user = await Manager.findOne({ phone_number }).populate('turf_id');
             if (!user) {
                 user = await Player.findOne({ phone_number });
+                if (user && user.role === 'admin') {
+                    return res.status(403).json({ message: 'Administrative access requires email login' });
+                }
                 isManager = false;
             }
         }

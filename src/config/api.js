@@ -1,2 +1,4 @@
-const API_BASE_URL = 'https://bookmyturff.onrender.com';
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000' 
+    : 'https://bookmyturff.onrender.com';
 export default API_BASE_URL;
