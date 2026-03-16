@@ -8,29 +8,29 @@ const jwt = require('jsonwebtoken');
 // Unified Login Route POST /api/login
 router.post('/login', async (req, res) => {
     try {
-        const { phone_number, password, registration_id, email } = req.body;
+        const { phone_number, email, password } = req.body;
+        const identifier = email || phone_number;
+
+        if (!identifier) return res.status(400).json({ message: 'Email or Phone Number is required' });
 
         let user = null;
         let isManager = true;
 
-        if (email) {
-            // Login by email (Admins/Owners)
-            user = await Manager.findOne({ email }).populate('turf_id');
+        if (identifier.includes('@')) {
+            // Treat as email
+            user = await Manager.findOne({ email: identifier }).populate('turf_id');
             if (!user) {
-                user = await Player.findOne({ email });
+                user = await Player.findOne({ email: identifier });
                 isManager = false;
             }
-        } else if (phone_number) {
-            // Login by phone (Players/Owners)
-            if (!/^[6-9]\d{9}$/.test(phone_number)) {
+        } else {
+            // Treat as phone number
+            if (!/^[6-9]\d{9}$/.test(identifier)) {
                 return res.status(400).json({ message: 'Invalid phone number format' });
             }
-            user = await Manager.findOne({ phone_number }).populate('turf_id');
+            user = await Manager.findOne({ phone_number: identifier }).populate('turf_id');
             if (!user) {
-                user = await Player.findOne({ phone_number });
-                if (user && user.role === 'admin') {
-                    return res.status(403).json({ message: 'Administrative access requires email login' });
-                }
+                user = await Player.findOne({ phone_number: identifier });
                 isManager = false;
             }
         }
@@ -85,7 +85,6 @@ router.post('/register', async (req, res) => {
         const existingManager = await Manager.findOne({ phone_number });
 
         if (existingPhone || existingManager) return res.status(400).json({ message: 'Phone number already registered' });
-
 
         if (!sports_played || sports_played.length === 0) {
             return res.status(400).json({ message: 'At least one sport must be selected' });

@@ -7,10 +7,8 @@ import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
 
 const Login = () => {
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
-    const [registrationId, setRegistrationId] = useState('');
     const [role, setRole] = useState('player'); // player, owner, admin
     const [loading, setLoading] = useState(false);
     const { user, login } = useContext(AuthContext);
@@ -29,9 +27,11 @@ const Login = () => {
         setLoading(true);
         try {
             let res;
-            let payload = role === 'admin' 
-                ? { email: email.trim(), password } 
-                : { phone_number: phoneNumber.trim(), password };
+            const isEmail = identifier.includes('@');
+            let payload = {
+                password,
+                [isEmail ? 'email' : 'phone_number']: identifier.trim()
+            };
 
             // Use unified login endpoint
             res = await axios.post(`${API_BASE_URL}/api/login`, payload);
@@ -98,42 +98,22 @@ const Login = () => {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    {role === 'admin' ? (
-                        <div style={{ marginBottom: '25px' }}>
-                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Email Address</label>
-                            <div className="input-with-icon">
-                                <FiUser />
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    placeholder="admin@bookmyturf.com"
-                                    required
-                                />
-                            </div>
+                    <div style={{ marginBottom: '25px' }}>
+                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>
+                            Email or Phone Number
+                        </label>
+                        <div className="input-with-icon">
+                            {identifier.includes('@') ? <FiUser /> : <FiPhone />}
+                            <input
+                                type="text"
+                                value={identifier}
+                                onChange={e => setIdentifier(e.target.value)}
+                                placeholder="Enter email or 10-digit phone"
+                                required
+                                style={{ paddingRight: '15px' }}
+                            />
                         </div>
-                    ) : (
-                        <div style={{ marginBottom: '25px' }}>
-                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Phone Number</label>
-                            <div className="phone-input-group">
-                                <div className="phone-prefix">+91</div>
-                                <div className="input-with-icon">
-                                    <FiPhone />
-                                    <input
-                                        type="tel"
-                                        value={phoneNumber}
-                                        onChange={e => {
-                                            const value = e.target.value.replace(/\D/g, '');
-                                            if (value.length <= 10) setPhoneNumber(value);
-                                        }}
-                                        placeholder="Mobile number"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
+                    </div>
 
                     <div style={{ marginBottom: '35px' }}>
                         <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Secure Key</label>
