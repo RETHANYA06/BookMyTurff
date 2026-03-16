@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const playerSchema = new mongoose.Schema({
     full_name: { type: String, required: true },
     phone_number: { type: String, required: true, unique: true },
+    email: { type: String, unique: true, sparse: true }, // Added for admin login
     password: { type: String, required: true },
 
     // Step 2: Details

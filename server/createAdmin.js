@@ -11,24 +11,26 @@ const createAdmin = async () => {
         console.log('Connected to MongoDB');
 
         const phone_number = '9999999999';
+        const email = 'admin@bookmyturf.com';
         const password = 'adminpassword';
         
-        const existingAdmin = await Player.findOne({ phone_number });
+        const existingAdmin = await Player.findOne({ email });
         if (existingAdmin) {
-            console.log('Admin already exists with this phone number');
+            console.log('Admin already exists with this email');
             process.exit(0);
         }
 
         const admin = new Player({
             full_name: 'System Administrator',
             phone_number: phone_number,
+            email: email,
             password: password, // Will be hashed by pre-save middleware
             role: 'admin'
         });
 
         await admin.save();
         console.log('Admin created successfully!');
-        console.log('Phone Number:', phone_number);
+        console.log('Email:', email);
         console.log('Password:', password);
         process.exit(0);
     } catch (error) {
