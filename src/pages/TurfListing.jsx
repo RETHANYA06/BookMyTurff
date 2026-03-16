@@ -137,7 +137,9 @@ const TurfListing = () => {
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800' }}>Live Slots</div>
-                                        <div style={{ fontWeight: '900', fontSize: '1rem', color: 'var(--text-primary)' }}>{turf.available_slots_today || 0} Available</div>
+                                        <div style={{ fontWeight: '900', fontSize: '1rem', color: 'var(--text-primary)' }}>
+                                            {turf.opening_time === turf.closing_time ? 'Open 24H' : `${formatTime(turf.opening_time)} - ${formatTime(turf.closing_time)}`}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

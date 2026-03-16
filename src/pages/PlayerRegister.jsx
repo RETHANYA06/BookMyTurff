@@ -15,7 +15,6 @@ const PlayerRegister = () => {
         phone_number: '',
         password: '',
         confirm_password: '',
-        email: '',
         // Step 2
         age_group: '21-25',
         gender: 'male',
@@ -61,12 +60,18 @@ const PlayerRegister = () => {
         if (e) e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post(`${API_BASE_URL}/api/register`, formData);
+            // Using /api/players/register to be compatible with current deployed backend
+            const res = await axios.post(`${API_BASE_URL}/api/players/register`, formData);
+            
+            // Accommodate 'player' (current render backend) or 'user' (unified_auth local)
+            const responseUser = res.data.player || res.data.user;
+            
             const playerWithRole = {
-                ...res.data.user,
-                role: res.data.role,
-                id: res.data.user.id || res.data.user._id
+                ...responseUser,
+                role: res.data.role || responseUser.role || 'user',
+                id: responseUser.id || responseUser._id
             };
+            
             login(playerWithRole);
             localStorage.setItem('token', res.data.token);
             alert('Welcome to BookMyTurf! Your sports profile is ready.');
@@ -134,11 +139,6 @@ const PlayerRegister = () => {
                         </div>
                         <small style={{ display: 'block', marginTop: '-15px', marginBottom: '20px', fontSize: '0.75rem', color: 'var(--text-secondary)', paddingLeft: '5px' }}>Must start with 6, 7, 8 or 9</small>
 
-                        <label>Email Address (Optional)</label>
-                        <div className="input-with-icon">
-                            <FiMail icon_pos="left" />
-                            <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="john@example.com" />
-                        </div>
 
                         <div className="grid">
                             <div>

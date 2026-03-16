@@ -16,7 +16,7 @@ const OwnerRegister = () => {
         // Step 1: Account
         name: '', phone_number: '', email: '', password: '',
         // Step 2: Turf Basic
-        turf_name: '', image_url: '', location: '', google_map_link: '', sport_type: '5s football', turf_size: 'medium',
+        turf_name: '', image_url: '', location: '', google_map_link: '', sport_type: 'Football', turf_size: 'medium',
         // Step 3: Operating
         opening_time: '06:00', closing_time: '22:00', slot_duration: '60', max_players: '22', base_price: '500',
         days_open: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
@@ -35,7 +35,12 @@ const OwnerRegister = () => {
         }
         if (step === 3) {
             if (formData.days_open.length === 0) return alert('Select at least one day');
-            if (formData.opening_time >= formData.closing_time) return alert('Closing time must be after opening time');
+            // Allow 24h setup if opening and closing are same (handled in backend)
+            if (formData.opening_time === formData.closing_time && formData.opening_time !== '00:00') {
+               // Optional: inform user this means 24h
+            } else if (formData.opening_time > formData.closing_time && formData.closing_time !== '00:00') {
+                // Allow overnight or same time
+            }
         }
         setStep(step + 1);
     };
@@ -185,11 +190,14 @@ const OwnerRegister = () => {
                             <div className="form-group">
                                 <label>Primary Sport</label>
                                 <select value={formData.sport_type} onChange={e => setFormData({ ...formData, sport_type: e.target.value })}>
-                                    <option value="5s football">5s Football</option>
-                                    <option value="7s football">7s Football</option>
-                                    <option value="cricket">Cricket</option>
-                                    <option value="badminton">Badminton</option>
-                                    <option value="multi-sport">Multi-Sport</option>
+                                    <option value="Football">Football</option>
+                                    <option value="5s Football">5s Football</option>
+                                    <option value="7s Football">7s Football</option>
+                                    <option value="Cricket">Cricket</option>
+                                    <option value="Box Cricket">Box Cricket</option>
+                                    <option value="Badminton">Badminton</option>
+                                    <option value="Tennis">Tennis</option>
+                                    <option value="Multi-Sport">Multi-Sport</option>
                                 </select>
                             </div>
                             <div className="form-group">
@@ -222,6 +230,23 @@ const OwnerRegister = () => {
                                     <input style={{ paddingLeft: '50px' }} type="time" value={formData.closing_time} onChange={e => setFormData({ ...formData, closing_time: e.target.value })} />
                                 </div>
                             </div>
+                        </div>
+                        <div style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', background: 'rgba(16, 185, 129, 0.05)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                                <input 
+                                    type="checkbox" 
+                                    style={{ width: 'auto', marginBottom: 0 }} 
+                                    checked={formData.opening_time === '00:00' && formData.closing_time === '00:00'}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setFormData({ ...formData, opening_time: '00:00', closing_time: '00:00' });
+                                        } else {
+                                            setFormData({ ...formData, opening_time: '06:00', closing_time: '22:00' });
+                                        }
+                                    }}
+                                />
+                                <span style={{ fontWeight: '700', color: 'var(--primary)' }}>Open 24 Hours / 7 Days</span>
+                            </label>
                         </div>
                         <div className="grid">
                             <div className="form-group">

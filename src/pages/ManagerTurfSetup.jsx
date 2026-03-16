@@ -46,7 +46,9 @@ const ManagerTurfSetup = () => {
                 });
                 alert('Turf updated successfully');
             } else {
-                const res = await axios.post(`${API_BASE_URL}/api/turfs`, turf, {
+                // Include local items during initial creation
+                const payload = { ...turf, rental_items: items };
+                const res = await axios.post(`${API_BASE_URL}/api/turfs`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 alert('Turf created successfully!');
@@ -54,12 +56,21 @@ const ManagerTurfSetup = () => {
                 navigate('/manager/dashboard');
             }
         } catch (err) {
-            alert(err.response?.data?.message || 'Operation failed');
+            const errorMsg = err.response?.data?.message || err.response?.data?.error || err.message || 'Operation failed';
+            alert(errorMsg);
         }
     };
 
     const addItem = async () => {
-        if (!manager.turf_id) return alert('Please create your turf first before adding items!');
+        if (!newItem.item_name || !newItem.rent_price) return alert('Enter item name and price');
+        
+        if (!manager.turf_id) {
+            // Local add for new turfs
+            setItems([...items, { ...newItem, _id: Date.now().toString() }]); // Temporary ID
+            setNewItem({ item_name: '', rent_price: '' });
+            return;
+        }
+
         try {
             const res = await axios.post(`${API_BASE_URL}/api/turfs/${manager.turf_id}/items`, newItem);
             setItems([...items, res.data]);
@@ -70,6 +81,12 @@ const ManagerTurfSetup = () => {
     };
 
     const deleteItem = async (id) => {
+        if (!manager.turf_id) {
+            // Local delete
+            setItems(items.filter(i => i._id !== id));
+            return;
+        }
+        
         try {
             await axios.delete(`${API_BASE_URL}/api/turfs/items/${id}`);
             setItems(items.filter(i => i._id !== id));
@@ -142,6 +159,27 @@ const ManagerTurfSetup = () => {
                             <label>Closing Time</label>
                             <input type="time" value={turf.closing_time} onChange={e => setTurf({ ...turf, closing_time: e.target.value })} />
                         </div>
+                    </div>
+
+                    <div style={{ marginBottom: '25px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', background: 'rgba(16, 185, 129, 0.05)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                            <input 
+                                type="checkbox" 
+                                style={{ width: 'auto', marginBottom: 0 }} 
+                                checked={turf.opening_time === '00:00' && turf.closing_time === '00:00'}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setTurf({ ...turf, opening_time: '00:00', closing_time: '00:00' });
+                                    } else {
+                                        setTurf({ ...turf, opening_time: '06:00', closing_time: '22:00' });
+                                    }
+                                }}
+                            />
+                            <span style={{ fontWeight: '700', color: 'var(--primary)' }}>Open 24 Hours / 7 Days</span>
+                        </label>
+                    </div>
+
+                    <div className="grid" style={{ gridTemplateColumns: '1fr' /* Adjustment for layout */ }}>
                         <div>
                             <label>Slot Duration (min)</label>
                             <select value={turf.slot_duration} onChange={e => setTurf({ ...turf, slot_duration: parseInt(e.target.value) })}>
@@ -164,7 +202,16 @@ const ManagerTurfSetup = () => {
                         </div>
                         <div>
                             <label>Sport Type</label>
-                            <input value={turf.sport_type || 'Football'} onChange={e => setTurf({ ...turf, sport_type: e.target.value })} />
+                            <select value={turf.sport_type || 'Football'} onChange={e => setTurf({ ...turf, sport_type: e.target.value })}>
+                                <option value="Football">Football</option>
+                                <option value="5s Football">5s Football</option>
+                                <option value="7s Football">7s Football</option>
+                                <option value="Cricket">Cricket</option>
+                                <option value="Box Cricket">Box Cricket</option>
+                                <option value="Badminton">Badminton</option>
+                                <option value="Tennis">Tennis</option>
+                                <option value="Multi-Sport">Multi-Sport</option>
+                            </select>
                         </div>
                     </div>
 

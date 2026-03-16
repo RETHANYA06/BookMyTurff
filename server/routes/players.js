@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 router.post('/register', async (req, res) => {
     try {
         const {
-            full_name, phone_number, password, email,
+            full_name, phone_number, password,
             age_group, gender, city, preferred_language,
             sports_played, skill_level, preferred_play_time, typical_group_size,
             willing_to_join_others, bring_own_equipment, notifications_opt_in
@@ -24,17 +24,13 @@ router.post('/register', async (req, res) => {
 
         if (existingPhone || existingManager) return res.status(400).json({ message: 'Phone number already registered' });
 
-        if (email) {
-            const existingEmail = await Player.findOne({ email });
-            if (existingEmail) return res.status(400).json({ message: 'Email already registered' });
-        }
 
         if (!sports_played || sports_played.length === 0) {
             return res.status(400).json({ message: 'At least one sport must be selected' });
         }
 
         const player = new Player({
-            full_name, phone_number, password, email,
+            full_name, phone_number, password,
             age_group, gender, city, preferred_language,
             sports_played, skill_level, preferred_play_time, typical_group_size,
             willing_to_join_others, bring_own_equipment, notifications_opt_in,

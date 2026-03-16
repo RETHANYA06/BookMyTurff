@@ -258,6 +258,7 @@ const TurfDetails = () => {
 
     const categorizeSlots = () => {
         const categories = {
+            'Late Night / Early Morning (11PM - 5AM)': [],
             'Early Morning (5AM - 9AM)': [],
             'Morning (9AM - 1PM)': [],
             'Afternoon (1PM - 5PM)': [],
@@ -267,14 +268,13 @@ const TurfDetails = () => {
 
         slots.forEach(slot => {
             const hour = parseInt(slot.start_time.split(':')[0]);
-            // Filter 5 AM to 11 PM
-            if (hour < 5 || (hour === 23 && parseInt(slot.start_time.split(':')[1]) > 0) || hour > 23) return;
-
+            
             if (hour >= 5 && hour < 9) categories['Early Morning (5AM - 9AM)'].push(slot);
             else if (hour >= 9 && hour < 13) categories['Morning (9AM - 1PM)'].push(slot);
             else if (hour >= 13 && hour < 17) categories['Afternoon (1PM - 5PM)'].push(slot);
             else if (hour >= 17 && hour < 21) categories['Evening (5PM - 9PM)'].push(slot);
-            else if (hour >= 21 && hour <= 23) categories['Night (9PM - 11PM)'].push(slot);
+            else if (hour >= 21 && hour < 23) categories['Night (9PM - 11PM)'].push(slot);
+            else categories['Late Night / Early Morning (11PM - 5AM)'].push(slot);
         });
 
         return categories;

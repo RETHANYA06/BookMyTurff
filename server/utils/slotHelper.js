@@ -6,7 +6,16 @@ const generateSlotsForDate = async (turf_id, date, openingTime, closingTime, pri
     let [endHour, endMin] = closingTime.split(':').map(Number);
 
     let currentTotalMins = startHour * 60 + startMin;
-    const endTotalMins = endHour * 60 + endMin;
+    let endTotalMins = endHour * 60 + endMin;
+
+    // Handle 24-hour operation (e.g., 00:00 to 00:00 or same time)
+    if (openingTime === closingTime) {
+        endTotalMins = currentTotalMins + (24 * 60);
+    } else if (endTotalMins < currentTotalMins) {
+        // Handle overnight slots if needed, but for now we generate per-date slots
+        // So we just stop at midnight unless it's a 24h turf
+        endTotalMins = endTotalMins + (24 * 60);
+    }
 
     while (currentTotalMins + duration <= endTotalMins) {
         const startH = Math.floor(currentTotalMins / 60);

@@ -28,14 +28,34 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const endpoint = `${API_BASE_URL}/api/login`;
-            const payload = role === 'admin' 
+            let res;
+            let payload = role === 'admin' 
                 ? { email: email.trim(), password } 
                 : { phone_number: phoneNumber.trim(), password };
 
-            const res = await axios.post(endpoint, payload);
+            try {
+                // Try unified endpoint first
+                res = await axios.post(`${API_BASE_URL}/api/login`, payload);
+            } catch (unifiedErr) {
+                // If 404, fallback to specialized endpoints (older deployments)
+                if (unifiedErr.response?.status === 404) {
+                    const fallbackEndpoint = role === 'player' 
+                        ? `${API_BASE_URL}/api/players/login` 
+                        : `${API_BASE_URL}/api/auth/login`;
+                    res = await axios.post(fallbackEndpoint, payload);
+                } else {
+                    throw unifiedErr;
+                }
+            }
 
-            const userData = res.data.user;
+            // Extract user data from various possible response shapes
+            const userData = res.data.user || res.data.player || {
+                id: res.data.id || res.data.manager_id || res.data._id,
+                full_name: res.data.full_name || res.data.name,
+                phone_number: res.data.phone_number,
+                role: res.data.role || role,
+                turf_id: res.data.turf_id
+            };
 
             if (res.data.token) {
                 localStorage.setItem('token', res.data.token);
@@ -43,10 +63,11 @@ const Login = () => {
 
             login(userData);
 
-            // Redirection based on role
-            if (userData.role === 'admin') {
+            // Redirection based on role (using finalized role in userData)
+            const finalRole = userData.role || role;
+            if (finalRole === 'admin') {
                 navigate('/admin-panel');
-            } else if (userData.role === 'owner') {
+            } else if (finalRole === 'owner') {
                 navigate('/manager/dashboard');
             } else {
                 navigate('/player/dashboard');

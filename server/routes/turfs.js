@@ -31,8 +31,8 @@ const authenticateOwner = async (req, res, next) => {
         if (!token) return res.status(401).json({ message: 'Authentication required' });
 
         const decoded = jwt.verify(token, 'your_jwt_secret');
-        if (decoded.role !== 'owner') {
-            return res.status(403).json({ message: 'Only turf owners can create turfs' });
+        if (decoded.role !== 'owner' && decoded.role !== 'admin') {
+            return res.status(403).json({ message: 'Only turf owners or admins can perform this action' });
         }
         req.user = decoded;
         next();
@@ -47,15 +47,17 @@ const { generateSlotsForDate } = require('../utils/slotHelper');
 // Create a new Turf (Owner only)
 router.post('/', authenticateOwner, async (req, res) => {
     try {
-        if (req.user.role !== 'owner') {
-            return res.status(403).json({ message: 'Only turf owners can create turfs' });
-        }
+        // Role checked by middleware
 
         const {
             turf_name, image_url, location, google_map_link, sport_type, turf_size,
             opening_time, closing_time, slot_duration, max_players, days_open, base_price,
             rules_text, rental_items
         } = req.body;
+
+        if (!turf_name || !location) {
+            return res.status(400).json({ message: 'Turf name and location are required' });
+        }
 
         const managerId = req.user.id;
 
@@ -114,7 +116,8 @@ router.post('/', authenticateOwner, async (req, res) => {
 
         res.status(201).json({ message: 'Turf created successfully', turf });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Turf Creation Error:', error);
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -152,7 +155,7 @@ router.get('/', async (req, res) => {
 
         res.json(enhancedTurfs.filter(t => t !== null));
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -163,7 +166,7 @@ router.get('/:id', async (req, res) => {
         const items = await TurfItem.find({ turf_id: req.params.id });
         res.json({ ...turf._doc, items });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -173,7 +176,7 @@ router.put('/:id', async (req, res) => {
         const turf = await Turf.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json(turf);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -184,7 +187,7 @@ router.post('/:id/items', async (req, res) => {
         await item.save();
         res.status(201).json(item);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -194,7 +197,7 @@ router.delete('/items/:itemId', async (req, res) => {
         await TurfItem.findByIdAndDelete(req.params.itemId);
         res.json({ message: 'Item deleted' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -219,7 +222,7 @@ router.get('/available-today/list', async (req, res) => {
 
         res.json(availableTurfs.filter(t => t !== null).sort((a, b) => b.available_count - a.available_count));
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 

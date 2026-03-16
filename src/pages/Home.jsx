@@ -170,7 +170,8 @@ const Home = () => {
                                         <div>
                                             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '3px' }}>Hours</div>
                                             <div style={{ fontWeight: '800', fontSize: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                <FiClock color="var(--primary)" size={16} /> {formatTime(turf.opening_time)} - {formatTime(turf.closing_time)}
+                                                <FiClock color="var(--primary)" size={16} /> 
+                                                {turf.opening_time === turf.closing_time ? 'Open 24 Hours' : `${formatTime(turf.opening_time)} - ${formatTime(turf.closing_time)}`}
                                             </div>
                                         </div>
                                     </div>
