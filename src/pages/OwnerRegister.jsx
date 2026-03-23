@@ -2,13 +2,14 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiUser, FiPhone, FiMail, FiLock, FiHome, FiMapPin, FiClock, FiSettings, FiCheck, FiPlus, FiTrash, FiLayers } from 'react-icons/fi';
+import { FiUser, FiPhone, FiMail, FiLock, FiHome, FiMapPin, FiClock, FiSettings, FiCheck, FiPlus, FiTrash, FiLayers, FiEye, FiEyeOff } from 'react-icons/fi';
 import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
 
 const OwnerRegister = () => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -144,8 +145,25 @@ const OwnerRegister = () => {
                         <div className="form-group">
                             <label>Strong Password</label>
                             <div style={{ position: 'relative' }}>
-                                <FiLock style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', opacity: 0.7 }} />
-                                <input style={{ paddingLeft: '50px' }} type="password" placeholder="Min 6 characters" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                                <FiLock style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', opacity: 0.7, zIndex: 1 }} />
+                                <input 
+                                    style={{ paddingLeft: '50px', paddingRight: '50px' }} 
+                                    type={showPassword ? "text" : "password"} 
+                                    placeholder="Min 6 characters" 
+                                    value={formData.password} 
+                                    onChange={e => setFormData({ ...formData, password: e.target.value })} 
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{
+                                        position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
+                                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
+                                    }}
+                                >
+                                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                </button>
                             </div>
                         </div>
                     </div>

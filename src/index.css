@@ -176,6 +176,7 @@ textarea {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   margin-bottom: 25px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  display: block; /* Ensure inputs don't leave gap */
 }
 
 input:focus,
@@ -209,12 +210,14 @@ select option {
 .input-with-icon {
   position: relative;
   width: 100%;
+  margin-bottom: 25px;
 }
 
 .input-with-icon svg {
   position: absolute;
   left: 18px;
-  top: 24px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--primary);
   opacity: 0.7;
   z-index: 2;
@@ -223,6 +226,7 @@ select option {
 
 .input-with-icon input {
   padding-left: 52px;
+  margin-bottom: 0;
 }
 
 .phone-input-group {

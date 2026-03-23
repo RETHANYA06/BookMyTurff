@@ -11,28 +11,23 @@ router.post('/login', async (req, res) => {
         const { phone_number, email, password } = req.body;
         const identifier = email || phone_number;
 
-        if (!identifier) return res.status(400).json({ message: 'Email or Phone Number is required' });
-
-        let user = null;
-        let isManager = true;
-
-        if (identifier.includes('@')) {
-            // Treat as email
-            user = await Manager.findOne({ email: identifier }).populate('turf_id');
+        if (email) {
+            // Login by email - ONLY for Admins
+            user = await Player.findOne({ email, role: 'admin' });
+            if (!user) return res.status(403).json({ message: 'Email login is restricted to administrators' });
+            isManager = false;
+        } else if (phone_number) {
+            // Login by phone - for Players and Owners
+            if (!/^[6-9]\d{9}$/.test(phone_number)) {
+                return res.status(400).json({ message: 'Invalid phone number format' });
+            }
+            user = await Manager.findOne({ phone_number }).populate('turf_id');
             if (!user) {
-                user = await Player.findOne({ email: identifier });
+                user = await Player.findOne({ phone_number, role: { $ne: 'admin' } });
                 isManager = false;
             }
         } else {
-            // Treat as phone number
-            if (!/^[6-9]\d{9}$/.test(identifier)) {
-                return res.status(400).json({ message: 'Invalid phone number format' });
-            }
-            user = await Manager.findOne({ phone_number: identifier }).populate('turf_id');
-            if (!user) {
-                user = await Player.findOne({ phone_number: identifier });
-                isManager = false;
-            }
+            return res.status(400).json({ message: 'Email or Phone Number is required' });
         }
 
         if (!user) return res.status(400).json({ message: 'User not found in system' });

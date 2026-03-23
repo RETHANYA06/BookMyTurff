@@ -2,13 +2,15 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiPhone, FiLock, FiUser, FiLayout } from 'react-icons/fi';
+import { FiPhone, FiLock, FiUser, FiLayout, FiEye, FiEyeOff } from 'react-icons/fi';
 import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
 
 const Login = () => {
-    const [identifier, setIdentifier] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [role, setRole] = useState('player'); // player, owner, admin
     const [loading, setLoading] = useState(false);
     const { user, login } = useContext(AuthContext);
@@ -27,11 +29,9 @@ const Login = () => {
         setLoading(true);
         try {
             let res;
-            const isEmail = identifier.includes('@');
-            let payload = {
-                password,
-                [isEmail ? 'email' : 'phone_number']: identifier.trim()
-            };
+            let payload = role === 'admin' 
+                ? { email: email.trim(), password } 
+                : { phone_number: phoneNumber.trim(), password };
 
             // Use unified login endpoint
             res = await axios.post(`${API_BASE_URL}/api/login`, payload);
@@ -98,34 +98,66 @@ const Login = () => {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '25px' }}>
-                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>
-                            Email or Phone Number
-                        </label>
-                        <div className="input-with-icon">
-                            {identifier.includes('@') ? <FiUser /> : <FiPhone />}
-                            <input
-                                type="text"
-                                value={identifier}
-                                onChange={e => setIdentifier(e.target.value)}
-                                placeholder="Enter email or 10-digit phone"
-                                required
-                                style={{ paddingRight: '15px' }}
-                            />
+                    {role === 'admin' ? (
+                        <div style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Email Address</label>
+                            <div className="input-with-icon">
+                                <FiUser />
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    placeholder="admin@bookmyturf.com"
+                                    required
+                                />
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Phone Number</label>
+                            <div className="phone-input-group">
+                                <div className="phone-prefix">+91</div>
+                                <div className="input-with-icon">
+                                    <FiPhone />
+                                    <input
+                                        type="tel"
+                                        value={phoneNumber}
+                                        onChange={e => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            if (value.length <= 10) setPhoneNumber(value);
+                                        }}
+                                        placeholder="Mobile number"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
 
                     <div style={{ marginBottom: '35px' }}>
                         <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '10px', paddingLeft: '5px' }}>Secure Key</label>
-                        <div className="input-with-icon">
-                            <FiLock />
+                        <div className="input-with-icon" style={{ position: 'relative' }}>
+                            <FiLock style={{ zIndex: 1 }} />
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 placeholder="••••••••"
                                 required
+                                style={{ paddingRight: '50px' }}
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
+                                }}
+                            >
+                                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                            </button>
                         </div>
                     </div>
 

@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiPhone, FiLock, FiUser, FiMail, FiMapPin, FiTarget, FiClock, FiUsers, FiCheckCircle, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
+import { FiPhone, FiLock, FiUser, FiMail, FiMapPin, FiTarget, FiClock, FiUsers, FiCheckCircle, FiChevronRight, FiChevronLeft, FiEye, FiEyeOff } from 'react-icons/fi';
 import { GiSoccerBall } from 'react-icons/gi';
 import API_BASE_URL from '../config/api';
 
@@ -10,6 +10,8 @@ const PlayerRegister = () => {
     const { login } = useContext(AuthContext);
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formData, setFormData] = useState({
         full_name: '',
         phone_number: '',
@@ -143,16 +145,52 @@ const PlayerRegister = () => {
                         <div className="grid">
                             <div>
                                 <label>Password</label>
-                                <div className="input-with-icon">
+                                <div className="input-with-icon" style={{ position: 'relative' }}>
                                     <FiLock icon_pos="left" />
-                                    <input type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" required />
+                                    <input 
+                                        type={showPassword ? "text" : "password"} 
+                                        value={formData.password} 
+                                        onChange={e => setFormData({ ...formData, password: e.target.value })} 
+                                        placeholder="••••••••" 
+                                        required 
+                                        style={{ paddingRight: '45px' }}
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{ 
+                                            position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
+                                            background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
+                                        }}
+                                    >
+                                        {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                    </button>
                                 </div>
                             </div>
                             <div>
                                 <label>Confirm Password</label>
-                                <div className="input-with-icon">
+                                <div className="input-with-icon" style={{ position: 'relative' }}>
                                     <FiLock icon_pos="left" />
-                                    <input type="password" value={formData.confirm_password} onChange={e => setFormData({ ...formData, confirm_password: e.target.value })} placeholder="••••••••" required />
+                                    <input 
+                                        type={showConfirmPassword ? "text" : "password"} 
+                                        value={formData.confirm_password} 
+                                        onChange={e => setFormData({ ...formData, confirm_password: e.target.value })} 
+                                        placeholder="••••••••" 
+                                        required 
+                                        style={{ paddingRight: '45px' }}
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        style={{ 
+                                            position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
+                                            background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
+                                        }}
+                                    >
+                                        {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                    </button>
                                 </div>
                             </div>
                         </div>

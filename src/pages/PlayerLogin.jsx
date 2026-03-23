@@ -2,12 +2,13 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiPhone, FiLock } from 'react-icons/fi';
+import { FiPhone, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
 
 const PlayerLogin = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -56,15 +57,27 @@ const PlayerLogin = () => {
                     </div>
 
                     <label>Password</label>
-                    <div className="input-with-icon">
-                        <FiLock />
+                    <div className="input-with-icon" style={{ position: 'relative' }}>
+                        <FiLock style={{ zIndex: 1 }} />
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             placeholder="Enter password"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             required
+                            style={{ paddingRight: '50px' }}
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{
+                                position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
+                                background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
+                            }}
+                        >
+                            {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                        </button>
                     </div>
 
                     <button className="btn btn-primary" disabled={loading} style={{ width: '100%', marginTop: '20px', height: '50px', justifyContent: 'center' }}>

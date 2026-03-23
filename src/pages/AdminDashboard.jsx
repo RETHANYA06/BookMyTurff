@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
-import { FiMonitor, FiActivity, FiUser, FiUsers, FiCalendar, FiClock, FiCheckCircle, FiXCircle, FiInfo, FiSmartphone, FiMail, FiLock, FiKey, FiPlus, FiArrowLeft } from 'react-icons/fi';
+import { FiMonitor, FiActivity, FiUser, FiUsers, FiCalendar, FiClock, FiCheckCircle, FiXCircle, FiInfo, FiSmartphone, FiMail, FiLock, FiKey, FiPlus, FiArrowLeft, FiEye, FiEyeOff } from 'react-icons/fi';
 import API_BASE_URL from '../config/api';
 import { formatINR, formatDate, formatTime } from '../utils/formatters';
 
@@ -16,6 +16,7 @@ const AdminDashboard = () => {
     const [creatingOwner, setCreatingOwner] = useState(false);
     const [ownerData, setOwnerData] = useState({ name: '', phone_number: '', registration_id: '', email: '', password: '' });
     const [ownerAccounts, setOwnerAccounts] = useState([]);
+    const [showPassword, setShowPassword] = useState(false);
     const [loadingOwners, setLoadingOwners] = useState(false);
     const showOwners = searchParams.get('view') === 'owners';
     const [stats, setStats] = useState({
@@ -466,19 +467,31 @@ const AdminDashboard = () => {
                                 alignItems: 'center', 
                                 padding: '0 25px',
                                 height: '70px',
-                                transition: 'all 0.3s ease'
+                                transition: 'all 0.3s ease',
+                                position: 'relative'
                             }}>
-                                <FiLock style={{ color: 'var(--primary)', fontSize: '1.4rem', flexShrink: 0 }} />
+                                <FiLock style={{ color: 'var(--primary)', fontSize: '1.4rem', flexShrink: 0, zIndex: 1 }} />
                                 <input 
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     placeholder="" 
                                     autoComplete="new-password"
                                     name="owner_password"
                                     value={ownerData.password} 
                                     onChange={e => setOwnerData({ ...ownerData, password: e.target.value })} 
                                     required 
-                                    style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', height: '100%', padding: '0 20px', fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: 0, boxShadow: 'none' }}
+                                    style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', height: '100%', padding: '0 20px', paddingRight: '50px', fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: 0, boxShadow: 'none' }}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{
+                                        position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)',
+                                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
+                                    }}
+                                >
+                                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                </button>
                             </div>
                         </div>
                     </div>
