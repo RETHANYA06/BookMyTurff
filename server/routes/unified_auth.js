@@ -8,40 +8,45 @@ const jwt = require('jsonwebtoken');
 // Unified Login Route POST /api/login
 router.post('/login', async (req, res) => {
     try {
-        const { phone_number, email, password } = req.body;
-        const identifier = email || phone_number;
+        const { email, phone_number, password } = req.body;
 
+        let user;
+        let isManager = false;
+
+        // Identification Logic
         if (email) {
-            // Login by email - ONLY for Admins
-            user = await Player.findOne({ email, role: 'admin' });
-            if (!user) return res.status(403).json({ message: 'Email login is restricted to administrators' });
-            isManager = false;
+            // Check Player/Admin collection first
+            user = await Player.findOne({ email });
         } else if (phone_number) {
-            // Login by phone - for Players and Owners
-            if (!/^[6-9]\d{9}$/.test(phone_number)) {
-                return res.status(400).json({ message: 'Invalid phone number format' });
-            }
+            // Check Manager (Owner) collection first
             user = await Manager.findOne({ phone_number }).populate('turf_id');
-            if (!user) {
-                user = await Player.findOne({ phone_number, role: { $ne: 'admin' } });
-                isManager = false;
+            if (user) {
+                isManager = true;
+            } else {
+                // Check Player collection
+                user = await Player.findOne({ phone_number });
             }
         } else {
-            return res.status(400).json({ message: 'Email or Phone Number is required' });
+            return res.status(400).json({ message: "Email or Phone Number is required" });
         }
 
-        if (!user) return res.status(400).json({ message: 'User not found in system' });
+        if (!user) {
+            return res.status(400).json({ message: "User not found" });
+        }
 
-        // Password check
+        // Password verification
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: 'Password mismatch' });
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
 
+        // Role and Token Generation
         const role = user.role || (isManager ? 'owner' : 'user');
         const token = jwt.sign({ id: user._id, role }, 'your_jwt_secret', { expiresIn: '1d' });
 
         res.json({
-            message: 'Login successful',
-            role,
+            message: "Login successful",
+            role: role,
             token,
             user: {
                 id: user._id,
