@@ -15,6 +15,7 @@ router.post('/register', async (req, res) => {
 
 // Login Manager
 router.post('/login', async (req, res) => {
+    console.log("🔥 NEW LOGIN CODE RUNNING");
     try {
         const { phone_number, password } = req.body;
 

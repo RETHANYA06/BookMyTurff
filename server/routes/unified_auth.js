@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 
 // Unified Login Route POST /api/login
 router.post('/login', async (req, res) => {
+    console.log("🔥 NEW LOGIN CODE RUNNING (UNIFIED)");
     try {
         const { email, phone_number, password } = req.body;
 
