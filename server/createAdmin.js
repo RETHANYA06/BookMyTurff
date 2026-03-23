@@ -1,42 +1,32 @@
-const mongoose = require('mongoose');
-const Player = require('./models/Player');
-const bcrypt = require('bcryptjs');
-const dotenv = require('dotenv');
+const mongoose = require("mongoose");
+const User = require("./models/Player"); // Using the Player model which handles admin roles
+const bcrypt = require("bcryptjs");
+require("dotenv").config();
 
-dotenv.config();
-
-const createAdmin = async () => {
+async function createAdmin() {
     try {
         await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bookmyturf');
-        console.log('Connected to MongoDB');
-
-        const phone_number = '9999999999';
-        const email = 'admin@bookmyturf.com';
-        const password = 'adminpassword';
         
-        const existingAdmin = await Player.findOne({ email });
-        if (existingAdmin) {
-            console.log('Admin already exists with this email');
-            process.exit(0);
-        }
+        const hashedPassword = await bcrypt.hash("adminpassword", 10);
 
-        const admin = new Player({
-            full_name: 'System Administrator',
-            phone_number: phone_number,
-            email: email,
-            password: password, // Will be hashed by pre-save middleware
-            role: 'admin'
-        });
+        await User.findOneAndUpdate(
+            { email: "admin@bookmyturf.com" },
+            {
+                full_name: "Admin",
+                email: "admin@bookmyturf.com",
+                phone_number: "9999999999",
+                password: hashedPassword,
+                role: "admin"
+            },
+            { upsert: true, new: true } // 🔥 THIS IS IMPORTANT
+        );
 
-        await admin.save();
-        console.log('Admin created successfully!');
-        console.log('Email:', email);
-        console.log('Password:', password);
+        console.log("✅ Admin created/updated successfully");
         process.exit(0);
     } catch (error) {
-        console.error('Error creating admin:', error);
+        console.error("❌ Error creating/updating admin:", error);
         process.exit(1);
     }
-};
+}
 
 createAdmin();
