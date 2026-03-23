@@ -16,15 +16,15 @@ async function createAdmin() {
                 email: "admin@bookmyturf.com",
                 phone_number: "9999999999",
                 password: hashedPassword,
-                role: "admin"   // 🔥 VERY IMPORTANT
+                role: "admin"
             },
             { upsert: true, new: true }
         );
 
-        console.log("✅ Admin ready:", admin);
+        console.log("✅ Admin created in DB:", admin);
         process.exit();
     } catch (err) {
-        console.error("❌ Error setting up admin:", err);
+        console.error("❌ Error creating admin:", err);
         process.exit(1);
     }
 }
