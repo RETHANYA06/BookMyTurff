@@ -1,30 +1,30 @@
 const mongoose = require("mongoose");
-const User = require("./models/Player"); // Using the Player model which handles admin roles
-const bcrypt = require("bcryptjs");
-require("dotenv").config();
+const bcrypt = require("bcryptjs"); // Project uses bcryptjs
+const User = require("./models/Player"); // Using the Player model as no User model exists
+require('dotenv').config(); // Required for process.env.MONGO_URI
+
+mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/bookmyturf");
 
 async function createAdmin() {
     try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bookmyturf');
-        
         const hashedPassword = await bcrypt.hash("adminpassword", 10);
 
-        await User.findOneAndUpdate(
+        const admin = await User.findOneAndUpdate(
             { email: "admin@bookmyturf.com" },
             {
-                full_name: "Admin",
+                full_name: "Admin", // Adjusted to 'full_name' as per schema
                 email: "admin@bookmyturf.com",
                 phone_number: "9999999999",
                 password: hashedPassword,
-                role: "admin"
+                role: "admin"   // 🔥 VERY IMPORTANT
             },
-            { upsert: true, new: true } // 🔥 THIS IS IMPORTANT
+            { upsert: true, new: true }
         );
 
-        console.log("✅ Admin created/updated successfully");
-        process.exit(0);
-    } catch (error) {
-        console.error("❌ Error creating/updating admin:", error);
+        console.log("✅ Admin ready:", admin);
+        process.exit();
+    } catch (err) {
+        console.error("❌ Error setting up admin:", err);
         process.exit(1);
     }
 }
